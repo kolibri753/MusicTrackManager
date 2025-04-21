@@ -16,12 +16,14 @@ export const getColumns = (
   {
     accessorKey: "genres",
     header: "Genres",
+    enableSorting: true,
+    // custom compare two joined-strings
     sortingFn: (rowA, rowB, columnId) => {
-      const a = (rowA.getValue(columnId) as string[]).join(", ");
-      const b = (rowB.getValue(columnId) as string[]).join(", ");
+      const a = (rowA.getValue<string[]>(columnId) ?? []).join(", ");
+      const b = (rowB.getValue<string[]>(columnId) ?? []).join(", ");
       return a.localeCompare(b);
     },
-    cell: (info) => (info.getValue() as string[]).join(", "),
+    cell: (info) => (info.getValue<string[]>() ?? []).join(", "),
   },
   {
     id: "actions",

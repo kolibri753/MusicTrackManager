@@ -39,20 +39,19 @@ export const TrackTable: React.FC<Props> = ({
   setSort,
   setOrder,
 }) => {
-  // 1) keep local sorting state in sync with your sort/order props
+  // 1) control sorting state locally
   const [sorting, setSorting] = useState<SortingState>([
     { id: sort, desc: order === "desc" },
   ]);
 
-  // 2) whenever sorting changes *and* it's NOT genres, push it back to server
+  // 2) if user sorts anything *but* genres, push to server
   useEffect(() => {
     if (!sorting.length) return;
-    const { id, desc } = sorting[0];
+    const [{ id, desc }] = sorting;
     if (id !== "genres") {
       setSort(id as keyof Track);
       setOrder(desc ? "desc" : "asc");
     }
-    // if id === "genres", we do *no* server call
   }, [sorting, setSort, setOrder]);
 
   const columns = useMemo(
@@ -60,13 +59,19 @@ export const TrackTable: React.FC<Props> = ({
     [onEdit, onDelete]
   );
 
+  // 3) switch between server- and client-side sorting
+  const isManual = sorting[0]?.id !== "genres";
+
   const table = useReactTable({
     data,
     columns,
-    manualSorting: sort !== "genres",
     state: { sorting },
     onSortingChange: setSorting,
+    // if sorting by anything except "genres", we assume data is already server-sorted
+    manualSorting: isManual,
+    enableSortingRemoval: false,
     getCoreRowModel: getCoreRowModel(),
+    // only used when manualSorting === false
     getSortedRowModel: getSortedRowModel(),
   });
 
