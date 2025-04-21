@@ -5,13 +5,16 @@ export const fetchTracks = async (
   page = 1,
   limit = 10,
   sort?: keyof Track,
-  order?: "asc" | "desc"
+  order?: "asc" | "desc",
+  genre?: string,
+  artist?: string,
+  search?: string
 ): Promise<{ data: Track[]; meta: Meta }> => {
   const { data } = await axios.get<{
     data: Track[];
     meta: Meta;
   }>("/api/tracks", {
-    params: { page, limit, sort, order },
+    params: { page, limit, sort, order, genre, artist, search },
   });
   return data;
 };

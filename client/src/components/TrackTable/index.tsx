@@ -26,6 +26,12 @@ interface Props {
   order: "asc" | "desc";
   setSort(f: keyof Track): void;
   setOrder(o: "asc" | "desc"): void;
+  filterGenre: string;
+  onFilterGenreChange(v: string): void;
+  filterArtist: string;
+  onFilterArtistChange(v: string): void;
+  search: string;
+  onSearchChange(v: string): void;
 }
 
 export const TrackTable: React.FC<Props> = ({
@@ -41,6 +47,12 @@ export const TrackTable: React.FC<Props> = ({
   order,
   setSort,
   setOrder,
+  filterGenre,
+  onFilterGenreChange,
+  filterArtist,
+  onFilterArtistChange,
+  search,
+  onSearchChange,
 }) => {
   // — STATE —
   const [sorting, setSorting] = useState<SortingState>([
@@ -102,26 +114,24 @@ export const TrackTable: React.FC<Props> = ({
       {/* — Filters + Search — */}
       <div className="flex flex-wrap gap-4 mb-4">
         <SearchInput
-          value={searchTerm}
-          onChange={setSearchTerm}
+          value={search}
+          onChange={onSearchChange}
           placeholder="Search tracks…"
           testid="search-input"
         />
-
         <FilterSelect
           label="Artist"
           options={allArtists}
-          value={(table.getColumn("artist")?.getFilterValue() as string) ?? ""}
+          value={filterArtist}
           testid="filter-artist"
-          onChange={(v) => table.getColumn("artist")?.setFilterValue(v)}
+          onChange={onFilterArtistChange}
         />
-
         <FilterSelect
           label="Genre"
           options={allGenres}
-          value={(table.getColumn("genres")?.getFilterValue() as string) ?? ""}
+          value={filterGenre}
           testid="filter-genre"
-          onChange={(v) => table.getColumn("genres")?.setFilterValue(v)}
+          onChange={onFilterGenreChange}
         />
       </div>
 

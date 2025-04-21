@@ -14,6 +14,12 @@ const TracksPage: React.FC = () => {
     order,
     setSort,
     setOrder,
+    filterGenre,
+    setFilterGenre,
+    filterArtist,
+    setFilterArtist,
+    search,
+    setSearch,
   } = useTracks();
 
   const handleEdit = (id: string) => console.log("edit", id);
@@ -35,6 +41,12 @@ const TracksPage: React.FC = () => {
         order={order}
         setSort={setSort}
         setOrder={setOrder}
+        filterGenre={filterGenre}
+        onFilterGenreChange={setFilterGenre}
+        filterArtist={filterArtist}
+        onFilterArtistChange={setFilterArtist}
+        search={search}
+        onSearchChange={setSearch}
       />
     </div>
   );

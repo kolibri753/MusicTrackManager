@@ -15,11 +15,23 @@ export function useTracks(initialLimit = 10) {
   const [sort, setSort] = useState<keyof Track>("title");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
 
+  const [filterGenre, setFilterGenre] = useState("");
+  const [filterArtist, setFilterArtist] = useState("");
+  const [search, setSearch] = useState("");
+
   const load = useCallback(async () => {
-    const res = await fetchTracks(page, limit, sort, order);
+    const res = await fetchTracks(
+      page,
+      limit,
+      sort,
+      order,
+      filterGenre,
+      filterArtist,
+      search
+    );
     setData(res.data);
     setMeta(res.meta);
-  }, [page, limit, sort, order]);
+  }, [page, limit, sort, order, filterGenre, filterArtist, search]);
 
   useEffect(() => {
     load();
@@ -36,5 +48,11 @@ export function useTracks(initialLimit = 10) {
     setLimit,
     setSort,
     setOrder,
+    filterGenre,
+    setFilterGenre,
+    filterArtist,
+    setFilterArtist,
+    search,
+    setSearch,
   };
 }
