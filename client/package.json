@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.8.4",
     "daisyui": "^5.0.27",
     "lucide-react": "^0.493.0",

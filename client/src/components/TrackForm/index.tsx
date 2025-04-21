@@ -1,25 +1,25 @@
 // client/src/components/TrackForm/index.tsx
 import { useState } from "react";
 import { TagSelector } from "../Form/TagSelector";
-import { TrackDto } from "../../types";
+import { TrackFormData } from "../../types";
 
 export function TrackForm({
   onSubmit,
   onCancel,
 }: {
-  onSubmit(data: TrackDto): Promise<void>;
+  onSubmit(data: TrackFormData): Promise<void>;
   onCancel(): void;
 }) {
-  const [form, setForm] = useState<TrackDto>({
+  const [form, setForm] = useState<TrackFormData>({
     title: "",
     artist: "",
     album: "",
     genres: [],
     coverImage: "",
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof TrackDto, string>>>(
-    {}
-  );
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof TrackFormData, string>>
+  >({});
   const [loading, setLoading] = useState(false);
 
   const validate = (): boolean => {
