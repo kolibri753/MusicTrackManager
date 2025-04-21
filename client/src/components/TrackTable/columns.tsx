@@ -7,24 +7,37 @@ export const getColumns = (
   onDelete: (id: string) => void
 ): ColumnDef<Track>[] => [
   { accessorKey: "title", header: "Title" },
-  { accessorKey: "artist", header: "Artist" },
+
+  {
+    accessorKey: "artist",
+    header: "Artist",
+    enableColumnFilter: true,
+    filterFn: "includesString",
+  },
+
   {
     accessorKey: "album",
     header: "Album",
     cell: (info) => info.getValue() ?? "—",
   },
+
   {
     accessorKey: "genres",
     header: "Genres",
     enableSorting: true,
-    // custom compare two joined-strings
-    sortingFn: (rowA, rowB, columnId) => {
-      const a = (rowA.getValue<string[]>(columnId) ?? []).join(", ");
-      const b = (rowB.getValue<string[]>(columnId) ?? []).join(", ");
-      return a.localeCompare(b);
+    enableColumnFilter: true,
+    sortingFn: (a, b, id) => {
+      const sa = (a.getValue<string[]>(id) ?? []).join(", ");
+      const sb = (b.getValue<string[]>(id) ?? []).join(", ");
+      return sa.localeCompare(sb);
+    },
+    filterFn: (row, id, filterValue: string) => {
+      if (!filterValue) return true;
+      return (row.getValue<string[]>(id) ?? []).includes(filterValue);
     },
     cell: (info) => (info.getValue<string[]>() ?? []).join(", "),
   },
+
   {
     id: "actions",
     header: "Actions",
