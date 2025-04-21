@@ -1,53 +1,55 @@
-// client/src/components/TrackTable/PaginationControls.tsx
 import React from "react";
-import type { Table } from "@tanstack/react-table";
-import type { Track } from "@/types/track";
 
 interface Props {
-  table: Table<Track>;
+  page: number;
+  totalPages: number;
+  limit: number;
+  setPage: (p: number) => void;
+  setLimit: (l: number) => void;
 }
 
-export const PaginationControls: React.FC<Props> = ({ table }) => {
-  const { pageIndex, pageSize } = table.getState().pagination;
+export const PaginationControls: React.FC<Props> = ({
+  page,
+  totalPages,
+  limit,
+  setPage,
+  setLimit,
+}) => (
+  <div className="flex items-center justify-between mt-4">
+    <button
+      className="btn btn-sm"
+      onClick={() => setPage(page - 1)}
+      disabled={page <= 1}
+    >
+      ← Prev
+    </button>
 
-  return (
-    <div className="flex items-center justify-between mt-4">
-      <button
-        data-testid="pagination-prev"
-        className="btn btn-sm"
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
-      >
-        ← Prev
-      </button>
+    <span>
+      Page {page} of {totalPages}
+    </span>
 
-      <span data-testid="pagination-info">
-        Page {pageIndex + 1} of {table.getPageCount()}
-      </span>
+    <button
+      className="btn btn-sm"
+      onClick={() => setPage(page + 1)}
+      disabled={page >= totalPages}
+    >
+      Next →
+    </button>
 
-      <button
-        data-testid="pagination-next"
-        className="btn btn-sm"
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
-      >
-        Next →
-      </button>
-      <select
-        data-testid="limit-select"
-        className="select select-bordered select-sm"
-        value={pageSize}
-        onChange={(e) => {
-          table.setPageSize(Number(e.target.value));
-          table.setPageIndex(0);
-        }}
-      >
-        {[5, 10, 20].map((n) => (
-          <option key={n} value={n}>
-            {n} / page
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
+    <select
+      className="select select-bordered select-sm"
+      value={limit}
+      onChange={(e) => {
+        setLimit(Number(e.target.value));
+        setPage(1);
+      }}
+    >
+      {[5, 10, 20].map((n) => (
+        <option key={n} value={n}>
+          {n} / page
+        </option>
+      ))}
+    </select>
+  </div>
+);
+

@@ -1,4 +1,3 @@
-// client/src/components/TrackTable/columns.ts
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit2, Trash2 } from "lucide-react";
 import type { Track } from "@/types/track";
@@ -17,6 +16,11 @@ export const getColumns = (
   {
     accessorKey: "genres",
     header: "Genres",
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = (rowA.getValue(columnId) as string[]).join(", ");
+      const b = (rowB.getValue(columnId) as string[]).join(", ");
+      return a.localeCompare(b);
+    },
     cell: (info) => (info.getValue() as string[]).join(", "),
   },
   {

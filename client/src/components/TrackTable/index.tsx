@@ -1,14 +1,10 @@
-// client/src/components/TrackTable/TrackTable.tsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getPaginationRowModel,
   flexRender,
   SortingState,
-  PaginationState,
-  Table,
 } from "@tanstack/react-table";
 import type { Track } from "@/types/track";
 import { getColumns } from "./columns";
@@ -18,29 +14,60 @@ interface Props {
   data: Track[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  page: number;
+  totalPages: number;
+  limit: number;
+  setPage: (p: number) => void;
+  setLimit: (l: number) => void;
+  sort: keyof Track;
+  order: "asc" | "desc";
+  setSort: (f: keyof Track) => void;
+  setOrder: (o: "asc" | "desc") => void;
 }
 
-export const TrackTable: React.FC<Props> = ({ data, onEdit, onDelete }) => {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+export const TrackTable: React.FC<Props> = ({
+  data,
+  onEdit,
+  onDelete,
+  page,
+  totalPages,
+  limit,
+  setPage,
+  setLimit,
+  sort,
+  order,
+  setSort,
+  setOrder,
+}) => {
+  // 1) keep local sorting state in sync with your sort/order props
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: sort, desc: order === "desc" },
+  ]);
+
+  // 2) whenever sorting changes *and* it's NOT genres, push it back to server
+  useEffect(() => {
+    if (!sorting.length) return;
+    const { id, desc } = sorting[0];
+    if (id !== "genres") {
+      setSort(id as keyof Track);
+      setOrder(desc ? "desc" : "asc");
+    }
+    // if id === "genres", we do *no* server call
+  }, [sorting, setSort, setOrder]);
 
   const columns = useMemo(
     () => getColumns(onEdit, onDelete),
     [onEdit, onDelete]
   );
 
-  const table: Table<Track> = useReactTable({
+  const table = useReactTable({
     data,
     columns,
-    state: { sorting, pagination },
+    manualSorting: sort !== "genres",
+    state: { sorting },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
@@ -81,7 +108,13 @@ export const TrackTable: React.FC<Props> = ({ data, onEdit, onDelete }) => {
         </tbody>
       </table>
 
-      <PaginationControls table={table} />
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        limit={limit}
+        setPage={setPage}
+        setLimit={setLimit}
+      />
     </>
   );
 };
