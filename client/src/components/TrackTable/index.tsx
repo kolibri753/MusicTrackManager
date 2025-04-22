@@ -9,6 +9,7 @@ import {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import type { Track } from "@/types/track";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { FilterSelect, SearchInput } from "@/components";
 import { getColumns } from "./columns";
 import { PaginationControls } from "./PaginationControls";
@@ -154,8 +155,8 @@ export const TrackTable: React.FC<Props> = ({
                     header.getContext()
                   )}
                   {{
-                    asc: " 🔼",
-                    desc: " 🔽",
+                    asc: <ChevronUp className="inline w-4 h-4 ml-1" />,
+                    desc: <ChevronDown className="inline w-4 h-4 ml-1" />,
                   }[header.column.getIsSorted() as string] ?? null}
                 </th>
               ))}
