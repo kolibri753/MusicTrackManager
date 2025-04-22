@@ -1,6 +1,6 @@
 import React from "react";
 import { useTracks } from "@/hooks/useTracks";
-import { TrackTable } from "@/components";
+import { Header, TrackTable } from "@/components";
 
 const TracksPage: React.FC = () => {
   const {
@@ -27,6 +27,7 @@ const TracksPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      <Header/>
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold mb-6 text-center">Tracks</h1>
         <TrackTable
