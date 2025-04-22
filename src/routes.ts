@@ -1,301 +1,321 @@
-import { FastifyInstance } from 'fastify';
-import { 
-  addTrack, 
-  deleteTrackFile, 
-  getAllTracks, 
-  getTrack, 
-  removeTrack, 
-  removeTracks, 
-  updateTrackById, 
-  uploadTrackFile 
-} from './controllers/tracks.controller';
-import { getAllGenres } from './controllers/genres.controller';
+import { FastifyInstance } from "fastify";
+import {
+  addTrack,
+  deleteTrackFile,
+  getAllArtists,
+  getAllTracks,
+  getTrack,
+  removeTrack,
+  removeTracks,
+  updateTrackById,
+  uploadTrackFile,
+} from "./controllers/tracks.controller";
+import { getAllGenres } from "./controllers/genres.controller";
 
 export default async function routes(fastify: FastifyInstance) {
   // Define schemas for routes
   const trackSchema = {
-    type: 'object',
+    type: "object",
     properties: {
-      id: { type: 'string' },
-      title: { type: 'string' },
-      artist: { type: 'string' },
-      album: { type: 'string' },
-      genres: { 
-        type: 'array',
-        items: { type: 'string' }
+      id: { type: "string" },
+      title: { type: "string" },
+      artist: { type: "string" },
+      album: { type: "string" },
+      genres: {
+        type: "array",
+        items: { type: "string" },
       },
-      slug: { type: 'string' },
-      coverImage: { type: 'string' },
-      audioFile: { type: 'string' },
-      createdAt: { type: 'string' },
-      updatedAt: { type: 'string' }
-    }
+      slug: { type: "string" },
+      coverImage: { type: "string" },
+      audioFile: { type: "string" },
+      createdAt: { type: "string" },
+      updatedAt: { type: "string" },
+    },
   };
-  
+
   const errorSchema = {
-    type: 'object',
+    type: "object",
     properties: {
-      error: { type: 'string' }
-    }
+      error: { type: "string" },
+    },
   };
-  
+
   // Health check
-  fastify.get('/health', {
+  fastify.get("/health", {
     schema: {
-      description: 'Health check endpoint',
-      tags: ['health'],
+      description: "Health check endpoint",
+      tags: ["health"],
       response: {
         200: {
-          type: 'object',
+          type: "object",
           properties: {
-            status: { type: 'string' }
-          }
-        }
-      }
+            status: { type: "string" },
+          },
+        },
+      },
     },
     handler: async (request, reply) => {
-      return reply.code(200).send({ status: 'ok' });
-    }
+      return reply.code(200).send({ status: "ok" });
+    },
   });
-  
+
   // Genres
-  fastify.get('/api/genres', {
+  fastify.get("/api/genres", {
     schema: {
-      description: 'Get all genres',
-      tags: ['genres'],
+      description: "Get all genres",
+      tags: ["genres"],
       response: {
         200: {
-          type: 'array',
-          items: { type: 'string' }
+          type: "array",
+          items: { type: "string" },
         },
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: getAllGenres
+    handler: getAllGenres,
   });
-  
-  // Tracks
-  fastify.get('/api/tracks', {
+
+  // Artists
+  fastify.get("/api/artists", {
     schema: {
-      description: 'Get all tracks with pagination, sorting, and filtering',
-      tags: ['tracks'],
+      description: "Get all distinct artist names",
+      tags: ["tracks"],
+      response: {
+        200: {
+          type: "array",
+          items: { type: "string" },
+        },
+        500: errorSchema,
+      },
+    },
+    handler: getAllArtists,
+  });
+
+  // Tracks
+  fastify.get("/api/tracks", {
+    schema: {
+      description: "Get all tracks with pagination, sorting, and filtering",
+      tags: ["tracks"],
       querystring: {
-        type: 'object',
+        type: "object",
         properties: {
-          page: { type: 'number' },
-          limit: { type: 'number' },
-          sort: { type: 'string', enum: ['title', 'artist', 'album', 'createdAt'] },
-          order: { type: 'string', enum: ['asc', 'desc'] },
-          search: { type: 'string' },
-          genre: { type: 'string' },
-          artist: { type: 'string' }
-        }
+          page: { type: "number" },
+          limit: { type: "number" },
+          sort: {
+            type: "string",
+            enum: ["title", "artist", "album", "createdAt"],
+          },
+          order: { type: "string", enum: ["asc", "desc"] },
+          search: { type: "string" },
+          genre: { type: "string" },
+          artist: { type: "string" },
+        },
       },
       response: {
         200: {
-          type: 'object',
+          type: "object",
           properties: {
             data: {
-              type: 'array',
-              items: trackSchema
+              type: "array",
+              items: trackSchema,
             },
             meta: {
-              type: 'object',
+              type: "object",
               properties: {
-                total: { type: 'number' },
-                page: { type: 'number' },
-                limit: { type: 'number' },
-                totalPages: { type: 'number' }
-              }
-            }
-          }
+                total: { type: "number" },
+                page: { type: "number" },
+                limit: { type: "number" },
+                totalPages: { type: "number" },
+              },
+            },
+          },
         },
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: getAllTracks
+    handler: getAllTracks,
   });
-  
-  fastify.get('/api/tracks/:slug', {
+
+  fastify.get("/api/tracks/:slug", {
     schema: {
-      description: 'Get a track by slug',
-      tags: ['tracks'],
+      description: "Get a track by slug",
+      tags: ["tracks"],
       params: {
-        type: 'object',
-        required: ['slug'],
+        type: "object",
+        required: ["slug"],
         properties: {
-          slug: { type: 'string' }
-        }
+          slug: { type: "string" },
+        },
       },
       response: {
         200: trackSchema,
         404: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: getTrack
+    handler: getTrack,
   });
-  
-  fastify.post('/api/tracks', {
+
+  fastify.post("/api/tracks", {
     schema: {
-      description: 'Create a new track',
-      tags: ['tracks'],
+      description: "Create a new track",
+      tags: ["tracks"],
       body: {
-        type: 'object',
-        required: ['title', 'artist', 'genres'],
+        type: "object",
+        required: ["title", "artist", "genres"],
         properties: {
-          title: { type: 'string' },
-          artist: { type: 'string' },
-          album: { type: 'string' },
-          genres: { 
-            type: 'array',
-            items: { type: 'string' }
+          title: { type: "string" },
+          artist: { type: "string" },
+          album: { type: "string" },
+          genres: {
+            type: "array",
+            items: { type: "string" },
           },
-          coverImage: { type: 'string' }
-        }
+          coverImage: { type: "string" },
+        },
       },
       response: {
         201: trackSchema,
         400: errorSchema,
         409: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: addTrack
+    handler: addTrack,
   });
-  
-  fastify.put('/api/tracks/:id', {
+
+  fastify.put("/api/tracks/:id", {
     schema: {
-      description: 'Update a track',
-      tags: ['tracks'],
+      description: "Update a track",
+      tags: ["tracks"],
       params: {
-        type: 'object',
-        required: ['id'],
+        type: "object",
+        required: ["id"],
         properties: {
-          id: { type: 'string' }
-        }
+          id: { type: "string" },
+        },
       },
       body: {
-        type: 'object',
+        type: "object",
         properties: {
-          title: { type: 'string' },
-          artist: { type: 'string' },
-          album: { type: 'string' },
-          genres: { 
-            type: 'array',
-            items: { type: 'string' }
+          title: { type: "string" },
+          artist: { type: "string" },
+          album: { type: "string" },
+          genres: {
+            type: "array",
+            items: { type: "string" },
           },
-          coverImage: { type: 'string' }
-        }
+          coverImage: { type: "string" },
+        },
       },
       response: {
         200: trackSchema,
         404: errorSchema,
         409: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: updateTrackById
+    handler: updateTrackById,
   });
-  
-  fastify.delete('/api/tracks/:id', {
+
+  fastify.delete("/api/tracks/:id", {
     schema: {
-      description: 'Delete a track',
-      tags: ['tracks'],
+      description: "Delete a track",
+      tags: ["tracks"],
       params: {
-        type: 'object',
-        required: ['id'],
+        type: "object",
+        required: ["id"],
         properties: {
-          id: { type: 'string' }
-        }
+          id: { type: "string" },
+        },
       },
       response: {
         204: {
-          type: 'null',
-          description: 'Track deleted successfully'
+          type: "null",
+          description: "Track deleted successfully",
         },
         404: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: removeTrack
+    handler: removeTrack,
   });
-  
-  fastify.post('/api/tracks/delete', {
+
+  fastify.post("/api/tracks/delete", {
     schema: {
-      description: 'Delete multiple tracks',
-      tags: ['tracks'],
+      description: "Delete multiple tracks",
+      tags: ["tracks"],
       body: {
-        type: 'object',
-        required: ['ids'],
+        type: "object",
+        required: ["ids"],
         properties: {
           ids: {
-            type: 'array',
-            items: { type: 'string' }
-          }
-        }
+            type: "array",
+            items: { type: "string" },
+          },
+        },
       },
       response: {
         200: {
-          type: 'object',
+          type: "object",
           properties: {
             success: {
-              type: 'array',
-              items: { type: 'string' }
+              type: "array",
+              items: { type: "string" },
             },
             failed: {
-              type: 'array',
-              items: { type: 'string' }
-            }
-          }
+              type: "array",
+              items: { type: "string" },
+            },
+          },
         },
         400: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: removeTracks
+    handler: removeTracks,
   });
-  
+
   // Track files
-  fastify.post('/api/tracks/:id/upload', {
+  fastify.post("/api/tracks/:id/upload", {
     schema: {
-      description: 'Upload an audio file for a track',
-      tags: ['tracks'],
-      consumes: ['multipart/form-data'],
+      description: "Upload an audio file for a track",
+      tags: ["tracks"],
+      consumes: ["multipart/form-data"],
       params: {
-        type: 'object',
-        required: ['id'],
+        type: "object",
+        required: ["id"],
         properties: {
-          id: { type: 'string' }
-        }
+          id: { type: "string" },
+        },
       },
       response: {
         200: trackSchema,
         400: errorSchema,
         404: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: uploadTrackFile
+    handler: uploadTrackFile,
   });
-  
-  fastify.delete('/api/tracks/:id/file', {
+
+  fastify.delete("/api/tracks/:id/file", {
     schema: {
-      description: 'Delete an audio file from a track',
-      tags: ['tracks'],
+      description: "Delete an audio file from a track",
+      tags: ["tracks"],
       params: {
-        type: 'object',
-        required: ['id'],
+        type: "object",
+        required: ["id"],
         properties: {
-          id: { type: 'string' }
-        }
+          id: { type: "string" },
+        },
       },
       response: {
         200: trackSchema,
         404: errorSchema,
-        500: errorSchema
-      }
+        500: errorSchema,
+      },
     },
-    handler: deleteTrackFile
+    handler: deleteTrackFile,
   });
 }

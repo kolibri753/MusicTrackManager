@@ -16,6 +16,8 @@ import { PaginationControls } from "./PaginationControls";
 
 interface Props {
   data: Track[];
+  genres: string[];
+  artists: string[];
   onEdit(id: string): void;
   onDelete(id: string): void;
   page: number;
@@ -37,6 +39,8 @@ interface Props {
 
 export const TrackTable: React.FC<Props> = ({
   data,
+  genres,
+  artists,
   onEdit,
   onDelete,
   page,
@@ -83,15 +87,6 @@ export const TrackTable: React.FC<Props> = ({
     () => getColumns(onEdit, onDelete),
     [onEdit, onDelete]
   );
-  const allGenres = useMemo(
-    () => Array.from(new Set(data.flatMap((d) => d.genres))).sort(),
-    [data]
-  );
-  const allArtists = useMemo(
-    () => Array.from(new Set(data.map((d) => d.artist))).sort(),
-    [data]
-  );
-
   // client-side sort only if sorting by "genres"
   const manualSorting = sorting[0]?.id !== "genres";
 
@@ -122,15 +117,15 @@ export const TrackTable: React.FC<Props> = ({
         />
         <div className="flex gap-4">
           <FilterSelect
-            label="Artist"
-            options={allArtists}
+            label="Artists"
+            options={artists}
             value={filterArtist}
             dataTestId="filter-artist"
             onChange={onFilterArtistChange}
           />
           <FilterSelect
-            label="Genre"
-            options={allGenres}
+            label="Genres"
+            options={genres}
             value={filterGenre}
             dataTestId="filter-genre"
             onChange={onFilterGenreChange}

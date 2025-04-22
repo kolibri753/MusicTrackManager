@@ -1,5 +1,5 @@
 import React from "react";
-import { useTracks } from "@/hooks/useTracks";
+import { useTracks, useArtists, useGenres } from "@/hooks";
 import { Header, TrackTable } from "@/components";
 
 const TracksPage: React.FC = () => {
@@ -25,13 +25,18 @@ const TracksPage: React.FC = () => {
   const handleEdit = (id: string) => console.log("edit", id);
   const handleDelete = (id: string) => console.log("delete", id);
 
+  const genres = useGenres();
+  const artists = useArtists();
+
   return (
     <div className="min-h-screen">
-      <Header/>
+      <Header />
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold mb-6 text-center">Tracks</h1>
         <TrackTable
           data={data}
+          genres={genres}
+          artists={artists}
           onEdit={handleEdit}
           onDelete={handleDelete}
           page={page}
