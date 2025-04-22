@@ -10,14 +10,16 @@ import {
 } from "@tanstack/react-table";
 import type { Track } from "@/types/track";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FilterSelect, SearchInput } from "@/components";
+import { FilterSelect, Modal, SearchInput, TrackForm } from "@/components";
 import { getColumns } from "./columns";
 import { PaginationControls } from "./PaginationControls";
+import { createTrack } from "@/api/tracks";
 
 interface Props {
   data: Track[];
   genres: string[];
   artists: string[];
+  refetch(): void;
   onEdit(id: string): void;
   onDelete(id: string): void;
   page: number;
@@ -41,6 +43,7 @@ export const TrackTable: React.FC<Props> = ({
   data,
   genres,
   artists,
+  refetch,
   onEdit,
   onDelete,
   page,
@@ -59,6 +62,7 @@ export const TrackTable: React.FC<Props> = ({
   search,
   onSearchChange,
 }) => {
+  const [isAdding, setIsAdding] = useState(false);
   // — STATE —
   const [sorting, setSorting] = useState<SortingState>([
     { id: sort, desc: order === "desc" },
@@ -132,6 +136,26 @@ export const TrackTable: React.FC<Props> = ({
           />
         </div>
       </div>
+
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Tracks</h1>
+        <button className="btn btn-primary" onClick={() => setIsAdding(true)}>
+          New Track
+        </button>
+      </div>
+
+      {isAdding && (
+        <Modal onClose={() => setIsAdding(false)}>
+          <TrackForm
+            onCancel={() => setIsAdding(false)}
+            onSubmit={async (form) => {
+              await createTrack(form);
+              setIsAdding(false);
+              refetch();
+            }}
+          />
+        </Modal>
+      )}
 
       {/* — Table — */}
       <table className="table w-full table-fixed">

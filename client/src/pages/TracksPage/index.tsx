@@ -20,6 +20,7 @@ const TracksPage: React.FC = () => {
     setFilterArtist,
     search,
     setSearch,
+    refetch,
   } = useTracks();
 
   const handleEdit = (id: string) => console.log("edit", id);
@@ -37,6 +38,7 @@ const TracksPage: React.FC = () => {
           data={data}
           genres={genres}
           artists={artists}
+          refetch={refetch}
           onEdit={handleEdit}
           onDelete={handleDelete}
           page={page}

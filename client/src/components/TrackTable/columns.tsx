@@ -1,4 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
+import BackupCoverUrl from "@/assets/logo.svg";
 import { Edit2, Trash2 } from "lucide-react";
 import type { Track } from "@/types/track";
 
@@ -6,6 +7,19 @@ export const getColumns = (
   onEdit: (id: string) => void,
   onDelete: (id: string) => void
 ): ColumnDef<Track>[] => [
+  {
+    accessorKey: "coverImage",
+    header: "Cover",
+    enableSorting: false,
+    cell: ({ getValue }) => {
+      const url = getValue<string>() || BackupCoverUrl;
+      return (
+        <img src={url} alt="cover" className="w-12 h-12 object-cover rounded" />
+      );
+    },
+    size: 80,
+  },
+
   { accessorKey: "title", header: "Title" },
 
   {

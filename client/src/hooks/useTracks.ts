@@ -54,5 +54,6 @@ export function useTracks(initialLimit = 10) {
     setFilterArtist,
     search,
     setSearch,
+    refetch: load,
   };
 }
