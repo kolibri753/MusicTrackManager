@@ -10,7 +10,7 @@ interface FilterSelectProps extends NativeSelectProps {
   options: string[];
   value: string;
   onChange(value: string): void;
-  testid?: string;
+  dataTestId?: string;
 }
 
 export const FilterSelect: React.FC<FilterSelectProps> = ({
@@ -18,7 +18,7 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
   options,
   value,
   onChange,
-  testid,
+  dataTestId,
   ...nativeProps
 }) => (
   <div className="form-control w-full sm:w-auto">
@@ -27,7 +27,7 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
     </label>
     <select
       {...nativeProps}
-      data-testid={testid}
+      data-testid={dataTestId}
       className="select select-bordered select-sm"
       value={value}
       onChange={(e) => onChange(e.target.value)}

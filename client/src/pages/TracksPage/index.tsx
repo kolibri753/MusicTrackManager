@@ -26,28 +26,30 @@ const TracksPage: React.FC = () => {
   const handleDelete = (id: string) => console.log("delete", id);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Tracks</h1>
-      <TrackTable
-        data={data}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        page={page}
-        totalPages={totalPages}
-        limit={limit}
-        setPage={setPage}
-        setLimit={setLimit}
-        sort={sort}
-        order={order}
-        setSort={setSort}
-        setOrder={setOrder}
-        filterGenre={filterGenre}
-        onFilterGenreChange={setFilterGenre}
-        filterArtist={filterArtist}
-        onFilterArtistChange={setFilterArtist}
-        search={search}
-        onSearchChange={setSearch}
-      />
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-3xl font-bold mb-6 text-center">Tracks</h1>
+        <TrackTable
+          data={data}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          page={page}
+          totalPages={totalPages}
+          limit={limit}
+          setPage={setPage}
+          setLimit={setLimit}
+          sort={sort}
+          order={order}
+          setSort={setSort}
+          setOrder={setOrder}
+          filterGenre={filterGenre}
+          onFilterGenreChange={setFilterGenre}
+          filterArtist={filterArtist}
+          onFilterArtistChange={setFilterArtist}
+          search={search}
+          onSearchChange={setSearch}
+        />
+      </div>
     </div>
   );
 };

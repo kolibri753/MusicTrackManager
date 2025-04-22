@@ -112,31 +112,33 @@ export const TrackTable: React.FC<Props> = ({
   return (
     <>
       {/* — Filters + Search — */}
-      <div className="flex flex-wrap gap-4 mb-4">
+      <div className="flex items-center justify-between mb-4">
         <SearchInput
           value={search}
           onChange={onSearchChange}
           placeholder="Search tracks…"
-          testid="search-input"
+          dataTestId="search-input"
         />
-        <FilterSelect
-          label="Artist"
-          options={allArtists}
-          value={filterArtist}
-          testid="filter-artist"
-          onChange={onFilterArtistChange}
-        />
-        <FilterSelect
-          label="Genre"
-          options={allGenres}
-          value={filterGenre}
-          testid="filter-genre"
-          onChange={onFilterGenreChange}
-        />
+        <div className="flex gap-4">
+          <FilterSelect
+            label="Artist"
+            options={allArtists}
+            value={filterArtist}
+            dataTestId="filter-artist"
+            onChange={onFilterArtistChange}
+          />
+          <FilterSelect
+            label="Genre"
+            options={allGenres}
+            value={filterGenre}
+            dataTestId="filter-genre"
+            onChange={onFilterGenreChange}
+          />
+        </div>
       </div>
 
       {/* — Table — */}
-      <table className="table w-full">
+      <table className="table w-full table-fixed">
         <thead>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
@@ -145,6 +147,7 @@ export const TrackTable: React.FC<Props> = ({
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
                   className="cursor-pointer select-none"
+                  style={{ width: header.column.columnDef.size }}
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -163,7 +166,7 @@ export const TrackTable: React.FC<Props> = ({
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td key={cell.id} style={{ width: cell.column.columnDef.size }}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

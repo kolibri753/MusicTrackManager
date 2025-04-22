@@ -41,6 +41,7 @@ export const getColumns = (
   {
     id: "actions",
     header: "Actions",
+    size: 50,
     cell: ({ row }) => (
       <div className="flex gap-2">
         <button

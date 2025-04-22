@@ -15,7 +15,7 @@ export const PaginationControls: React.FC<Props> = ({
   setPage,
   setLimit,
 }) => (
-  <div className="flex items-center justify-between mt-4">
+  <div className="flex items-center justify-end gap-4 mt-4">
     <button
       className="btn btn-sm"
       onClick={() => setPage(page - 1)}
