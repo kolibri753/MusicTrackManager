@@ -1,21 +1,23 @@
 // client/src/components/TrackForm/index.tsx
 import { useState } from "react";
 import { TagSelector } from "../Form/TagSelector";
-import { TrackFormData } from "../../types";
+import { Track, TrackFormData } from "@/types";
 
 export function TrackForm({
+  initialData,
   onSubmit,
   onCancel,
 }: {
+  initialData?: Track;
   onSubmit(data: TrackFormData): Promise<void>;
   onCancel(): void;
 }) {
   const [form, setForm] = useState<TrackFormData>({
-    title: "",
-    artist: "",
-    album: "",
-    genres: [],
-    coverImage: "",
+    title: initialData?.title || "",
+    artist: initialData?.artist || "",
+    album: initialData?.album || "",
+    genres: initialData?.genres || [],
+    coverImage: initialData?.coverImage || "",
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof TrackFormData, string>>

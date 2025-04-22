@@ -23,3 +23,15 @@ export const createTrack = async (track: TrackFormData) => {
   const { data } = await axios.post<Track>("/api/tracks", track);
   return data;
 };
+
+export const updateTrack = async (
+  id: string,
+  track: TrackFormData
+): Promise<Track> => {
+  const { data } = await axios.put<Track>(`/api/tracks/${id}`, track);
+  return data;
+};
+
+export const deleteTrack = async (id: string): Promise<void> => {
+  await axios.delete(`/api/tracks/${id}`);
+};

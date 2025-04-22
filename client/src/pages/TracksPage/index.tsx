@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTracks, useArtists, useGenres } from "@/hooks";
-import { Header, TrackTable } from "@/components";
+import {
+  DeleteConfirmationModal,
+  Header,
+  Modal,
+  TrackForm,
+  TrackTable,
+} from "@/components";
+import { Track } from "@/types";
+import { deleteTrack, updateTrack } from "@/api/tracks";
 
 const TracksPage: React.FC = () => {
   const {
@@ -23,8 +31,33 @@ const TracksPage: React.FC = () => {
     refetch,
   } = useTracks();
 
-  const handleEdit = (id: string) => console.log("edit", id);
-  const handleDelete = (id: string) => console.log("delete", id);
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages > 0 ? totalPages : 1);
+    }
+  }, [page, totalPages, setPage]);
+
+  const [editingTrack, setEditingTrack] = useState<Track | null>(null);
+  const [deletingTrack, setDeletingTrack] = useState<Track | null>(null);
+
+  const handleEdit = (id: string) => {
+    const track = data.find((t) => t.id === id);
+    if (track) setEditingTrack(track);
+  };
+
+  const closeEdit = () => setEditingTrack(null);
+
+  const handleDelete = (id: string) => {
+    const track = data.find((t) => t.id === id);
+    if (track) setDeletingTrack(track);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingTrack) return;
+    await deleteTrack(deletingTrack.id);
+    setDeletingTrack(null);
+    await refetch();
+  };
 
   const genres = useGenres();
   const artists = useArtists();
@@ -57,6 +90,28 @@ const TracksPage: React.FC = () => {
           search={search}
           onSearchChange={setSearch}
         />
+
+        {editingTrack && (
+          <Modal onClose={closeEdit}>
+            <TrackForm
+              initialData={editingTrack}
+              onSubmit={async (formData) => {
+                await updateTrack(editingTrack.id, formData);
+                closeEdit();
+                await refetch();
+              }}
+              onCancel={closeEdit}
+            />
+          </Modal>
+        )}
+
+        {deletingTrack && (
+          <DeleteConfirmationModal
+            title={deletingTrack.title}
+            onConfirm={confirmDelete}
+            onCancel={() => setDeletingTrack(null)}
+          />
+        )}
       </div>
     </div>
   );
