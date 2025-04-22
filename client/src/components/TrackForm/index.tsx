@@ -1,5 +1,4 @@
-// client/src/components/TrackForm/index.tsx
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { TagSelector } from "../Form/TagSelector";
 import { Track, TrackFormData } from "@/types";
 
@@ -28,14 +27,15 @@ export function TrackForm({
     const errs: any = {};
     if (!form.title) errs.title = "Title is required";
     if (!form.artist) errs.artist = "Artist is required";
+    if (form.genres.length === 0) errs.genres = "Select at least one genre";
     if (form.coverImage && !/^https?:\/\/.+\..+/.test(form.coverImage))
       errs.coverImage = "Invalid URL";
-    if (form.genres.length === 0) errs.genres = "Select at least one genre";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     if (!validate()) return;
     setLoading(true);
     try {
@@ -46,46 +46,67 @@ export function TrackForm({
   };
 
   return (
-    <div className="space-y-4">
+    <form
+      data-testid="track-form"
+      data-loading={loading ? "true" : undefined}
+      onSubmit={handleSubmit}
+      className="space-y-4"
+    >
       {/** Title **/}
       <div>
-        <label className="label">
+        <label htmlFor="title" className="label">
           <span className="label-text">Title</span>
         </label>
         <input
+          id="title"
+          data-testid="input-title"
           className="input input-bordered w-full"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
+          disabled={loading}
+          aria-disabled={loading}
         />
         {errors.title && (
-          <p className="text-error text-sm mt-1">{errors.title}</p>
+          <p data-testid="error-title" className="text-error text-sm mt-1">
+            {errors.title}
+          </p>
         )}
       </div>
 
       {/** Artist **/}
       <div>
-        <label className="label">
+        <label htmlFor="artist" className="label">
           <span className="label-text">Artist</span>
         </label>
         <input
+          id="artist"
+          data-testid="input-artist"
           className="input input-bordered w-full"
           value={form.artist}
           onChange={(e) => setForm({ ...form, artist: e.target.value })}
+          disabled={loading}
+          aria-disabled={loading}
         />
         {errors.artist && (
-          <p className="text-error text-sm mt-1">{errors.artist}</p>
+          <p data-testid="error-artist" className="text-error text-sm mt-1">
+            {errors.artist}
+          </p>
         )}
       </div>
 
       {/** Album **/}
       <div>
-        <label className="label">
+        <label htmlFor="album" className="label">
           <span className="label-text">Album</span>
         </label>
         <input
+          id="album"
+          data-testid="input-album"
           className="input input-bordered w-full"
           value={form.album}
           onChange={(e) => setForm({ ...form, album: e.target.value })}
+          disabled={loading}
+          aria-disabled={loading}
         />
       </div>
 
@@ -94,43 +115,69 @@ export function TrackForm({
         <label className="label">
           <span className="label-text">Genres</span>
         </label>
-        <TagSelector
-          value={form.genres}
-          onChange={(genres) => setForm({ ...form, genres })}
-        />
+        <div data-testid="genre-selector">
+          <TagSelector
+            value={form.genres}
+            onChange={(genres) => setForm({ ...form, genres })}
+          />
+        </div>
         {errors.genres && (
-          <p className="text-error text-sm mt-1">{errors.genres}</p>
+          <p data-testid="error-genre" className="text-error text-sm mt-1">
+            {errors.genres}
+          </p>
         )}
       </div>
 
       {/** Cover Image **/}
       <div>
-        <label className="label">
+        <label htmlFor="coverImage" className="label">
           <span className="label-text">Cover Image URL</span>
         </label>
         <input
+          id="coverImage"
+          data-testid="input-cover-image"
           className="input input-bordered w-full"
           value={form.coverImage}
           onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
+          disabled={loading}
+          aria-disabled={loading}
         />
         {errors.coverImage && (
-          <p className="text-error text-sm mt-1">{errors.coverImage}</p>
+          <p data-testid="error-coverImage" className="text-error text-sm mt-1">
+            {errors.coverImage}
+          </p>
         )}
       </div>
 
       {/** Actions **/}
       <div className="flex justify-end gap-2">
-        <button className="btn btn-outline" onClick={onCancel}>
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={onCancel}
+          disabled={loading}
+          aria-disabled={loading}
+        >
           Cancel
         </button>
         <button
+          type="submit"
+          data-testid="submit-button"
           className="btn btn-primary"
-          onClick={handleSubmit}
           disabled={loading}
+          aria-disabled={loading}
         >
-          {loading ? "Saving…" : "Save"}
+          {loading ? (
+            <span
+              data-testid="loading-indicator"
+              className="loading loading-spinner loading-xs"
+              data-loading="true"
+            ></span>
+          ) : (
+            "Save"
+          )}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
