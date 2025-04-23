@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { useTracks, useArtists, useGenres } from "@/hooks";
 import {
   DeleteConfirmationModal,
@@ -7,8 +8,8 @@ import {
   TrackForm,
   TrackTable,
 } from "@/components";
-import { Track } from "@/types";
-import { deleteTrack, updateTrack } from "@/api/tracks";
+import type { Track, TrackFormData } from "@/types";
+import { createTrack, updateTrack, deleteTrack } from "@/api/tracks";
 
 const TracksPage: React.FC = () => {
   const {
@@ -30,49 +31,82 @@ const TracksPage: React.FC = () => {
     setSearch,
     refetch,
   } = useTracks();
-
   useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages > 0 ? totalPages : 1);
-    }
+    if (page > totalPages) setPage(totalPages || 1);
   }, [page, totalPages, setPage]);
 
+  const artists = useArtists();
+  const genres = useGenres();
+
+  const [isCreating, setIsCreating] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [deletingTrack, setDeletingTrack] = useState<Track | null>(null);
 
-  const handleEdit = (id: string) => {
-    const track = data.find((t) => t.id === id);
-    if (track) setEditingTrack(track);
+  const extractMsg = (err: any) =>
+    err?.response?.data?.error || err.message || "Something went wrong";
+
+  const handleCreate = async (form: TrackFormData) => {
+    try {
+      await createTrack(form);
+      toast.success("Track created successfully");
+    } catch (err: any) {
+      toast.error(extractMsg(err));
+    } finally {
+      setIsCreating(false);
+      await refetch();
+    }
   };
 
-  const closeEdit = () => setEditingTrack(null);
-
-  const handleDelete = (id: string) => {
-    const track = data.find((t) => t.id === id);
-    if (track) setDeletingTrack(track);
+  const handleEditClick = (id: string) => {
+    setEditingTrack(data.find((t) => t.id === id) || null);
+  };
+  const handleUpdate = async (form: TrackFormData) => {
+    if (!editingTrack) return;
+    try {
+      await updateTrack(editingTrack.id, form);
+      toast.success("Track updated successfully");
+    } catch (err: any) {
+      toast.error(extractMsg(err));
+    } finally {
+      setEditingTrack(null);
+      await refetch();
+    }
   };
 
+  const handleDeleteClick = (id: string) => {
+    setDeletingTrack(data.find((t) => t.id === id) || null);
+  };
   const confirmDelete = async () => {
     if (!deletingTrack) return;
-    await deleteTrack(deletingTrack.id);
-    setDeletingTrack(null);
-    await refetch();
+    try {
+      await deleteTrack(deletingTrack.id);
+      toast.success("Track deleted successfully");
+    } catch (err: any) {
+      toast.error(extractMsg(err));
+    } finally {
+      setDeletingTrack(null);
+      await refetch();
+    }
   };
-
-  const genres = useGenres();
-  const artists = useArtists();
 
   return (
     <div className="min-h-screen">
       <Header />
       <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Tracks</h1>
+          <button
+            className="btn btn-primary"
+            onClick={() => setIsCreating(true)}
+          >
+            New Track
+          </button>
+        </div>
+
         <TrackTable
           data={data}
           genres={genres}
           artists={artists}
-          refetch={refetch}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
           page={page}
           totalPages={totalPages}
           limit={limit}
@@ -88,18 +122,25 @@ const TracksPage: React.FC = () => {
           onFilterArtistChange={setFilterArtist}
           search={search}
           onSearchChange={setSearch}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
         />
 
+        {isCreating && (
+          <Modal onClose={() => setIsCreating(false)}>
+            <TrackForm
+              onSubmit={handleCreate}
+              onCancel={() => setIsCreating(false)}
+            />
+          </Modal>
+        )}
+
         {editingTrack && (
-          <Modal onClose={closeEdit}>
+          <Modal onClose={() => setEditingTrack(null)}>
             <TrackForm
               initialData={editingTrack}
-              onSubmit={async (formData) => {
-                await updateTrack(editingTrack.id, formData);
-                closeEdit();
-                await refetch();
-              }}
-              onCancel={closeEdit}
+              onSubmit={handleUpdate}
+              onCancel={() => setEditingTrack(null)}
             />
           </Modal>
         )}

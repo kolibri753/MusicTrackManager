@@ -8,20 +8,16 @@ import {
   SortingState,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import type { Track } from "@/types/track";
+import { Track } from "@/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FilterSelect, Modal, SearchInput, TrackForm } from "@/components";
+import { FilterSelect, SearchInput } from "@/components";
 import { getColumns } from "./columns";
 import { PaginationControls } from "./PaginationControls";
-import { createTrack } from "@/api/tracks";
 
 interface Props {
   data: Track[];
   genres: string[];
   artists: string[];
-  refetch(): void;
-  onEdit(id: string): void;
-  onDelete(id: string): void;
   page: number;
   totalPages: number;
   limit: number;
@@ -37,15 +33,14 @@ interface Props {
   onFilterArtistChange(v: string): void;
   search: string;
   onSearchChange(v: string): void;
+  onEdit(id: string): void;
+  onDelete(id: string): void;
 }
 
 export const TrackTable: React.FC<Props> = ({
   data,
   genres,
   artists,
-  refetch,
-  onEdit,
-  onDelete,
   page,
   totalPages,
   limit,
@@ -61,17 +56,17 @@ export const TrackTable: React.FC<Props> = ({
   onFilterArtistChange,
   search,
   onSearchChange,
+  onEdit,
+  onDelete,
 }) => {
-  const [isAdding, setIsAdding] = useState(false);
-  // — STATE —
   const [sorting, setSorting] = useState<SortingState>([
     { id: sort, desc: order === "desc" },
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState(search);
 
-  // sync non‐genre sorts to server
+  useEffect(() => setSearchTerm(search), [search]);
+
   useEffect(() => {
     const first = sorting[0];
     if (first && first.id !== "genres") {
@@ -80,28 +75,19 @@ export const TrackTable: React.FC<Props> = ({
     }
   }, [sorting, setSort, setOrder]);
 
-  // debounce search → globalFilter
-  useEffect(() => {
-    const h = setTimeout(() => setGlobalFilter(searchTerm), 300);
-    return () => clearTimeout(h);
-  }, [searchTerm]);
-
-  // memo columns & distinct filter options
   const columns = useMemo(
     () => getColumns(onEdit, onDelete),
     [onEdit, onDelete]
   );
-  // client-side sort only if sorting by "genres"
-  const manualSorting = sorting[0]?.id !== "genres";
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters, globalFilter },
+    state: { sorting, columnFilters, globalFilter: searchTerm },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    manualSorting,
+    onGlobalFilterChange: setSearchTerm,
+    manualSorting: sorting[0]?.id !== "genres",
     enableSortingRemoval: false,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -111,10 +97,9 @@ export const TrackTable: React.FC<Props> = ({
 
   return (
     <>
-      {/* — Filters + Search — */}
       <div className="flex items-center justify-between mb-4">
         <SearchInput
-          value={search}
+          value={searchTerm}
           onChange={onSearchChange}
           placeholder="Search tracks…"
           dataTestId="search-input"
@@ -137,27 +122,6 @@ export const TrackTable: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Tracks</h1>
-        <button className="btn btn-primary" onClick={() => setIsAdding(true)}>
-          New Track
-        </button>
-      </div>
-
-      {isAdding && (
-        <Modal onClose={() => setIsAdding(false)}>
-          <TrackForm
-            onCancel={() => setIsAdding(false)}
-            onSubmit={async (form) => {
-              await createTrack(form);
-              setIsAdding(false);
-              refetch();
-            }}
-          />
-        </Modal>
-      )}
-
-      {/* — Table — */}
       <table className="table w-full table-fixed">
         <thead>
           {table.getHeaderGroups().map((hg) => (
@@ -195,7 +159,6 @@ export const TrackTable: React.FC<Props> = ({
         </tbody>
       </table>
 
-      {/* — Pagination — */}
       <PaginationControls
         page={page}
         totalPages={totalPages}
