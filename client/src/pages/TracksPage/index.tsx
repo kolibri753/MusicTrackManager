@@ -31,6 +31,7 @@ const TracksPage: React.FC = () => {
     setSearch,
     refetch,
   } = useTracks();
+
   useEffect(() => {
     if (page > totalPages) setPage(totalPages || 1);
   }, [page, totalPages, setPage]);
@@ -48,9 +49,11 @@ const TracksPage: React.FC = () => {
   const handleCreate = async (form: TrackFormData) => {
     try {
       await createTrack(form);
-      toast.success("Track created successfully");
+      toast.success(
+        <span data-testid="toast-success">Track created successfully</span>
+      );
     } catch (err: any) {
-      toast.error(extractMsg(err));
+      toast.error(<span data-testid="toast-error">{extractMsg(err)}</span>);
     } finally {
       setIsCreating(false);
       await refetch();
@@ -64,9 +67,11 @@ const TracksPage: React.FC = () => {
     if (!editingTrack) return;
     try {
       await updateTrack(editingTrack.id, form);
-      toast.success("Track updated successfully");
+      toast.success(
+        <span data-testid="toast-success">Track updated successfully</span>
+      );
     } catch (err: any) {
-      toast.error(extractMsg(err));
+      toast.error(<span data-testid="toast-error">{extractMsg(err)}</span>);
     } finally {
       setEditingTrack(null);
       await refetch();
@@ -80,9 +85,11 @@ const TracksPage: React.FC = () => {
     if (!deletingTrack) return;
     try {
       await deleteTrack(deletingTrack.id);
-      toast.success("Track deleted successfully");
+      toast.success(
+        <span data-testid="toast-success">Track deleted successfully</span>
+      );
     } catch (err: any) {
-      toast.error(extractMsg(err));
+      toast.error(<span data-testid="toast-error">{extractMsg(err)}</span>);
     } finally {
       setDeletingTrack(null);
       await refetch();
