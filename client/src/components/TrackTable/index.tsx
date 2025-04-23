@@ -35,6 +35,8 @@ interface Props {
   onSearchChange(v: string): void;
   onEdit(id: string): void;
   onDelete(id: string): void;
+  onUploadClick(id: string): void;
+  onDeleteFile(id: string): void;
 }
 
 export const TrackTable: React.FC<Props> = ({
@@ -58,6 +60,8 @@ export const TrackTable: React.FC<Props> = ({
   onSearchChange,
   onEdit,
   onDelete,
+  onUploadClick,
+  onDeleteFile,
 }) => {
   const [sorting, setSorting] = useState<SortingState>([
     { id: sort, desc: order === "desc" },
@@ -76,8 +80,8 @@ export const TrackTable: React.FC<Props> = ({
   }, [sorting, setSort, setOrder]);
 
   const columns = useMemo(
-    () => getColumns(onEdit, onDelete),
-    [onEdit, onDelete]
+    () => getColumns(onEdit, onDelete, onUploadClick, onDeleteFile),
+    [onEdit, onDelete, onUploadClick, onDeleteFile]
   );
 
   const table = useReactTable({
@@ -122,7 +126,7 @@ export const TrackTable: React.FC<Props> = ({
         </div>
       </div>
 
-      <table className="table w-full table-fixed">
+      <table className="table w-full table-auto">
         <thead>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>

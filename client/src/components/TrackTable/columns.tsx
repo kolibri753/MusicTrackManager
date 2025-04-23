@@ -1,11 +1,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import BackupCoverUrl from "@/assets/logo.svg";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, X } from "lucide-react";
 import type { Track } from "@/types/track";
 
 export const getColumns = (
   onEdit: (id: string) => void,
-  onDelete: (id: string) => void
+  onDelete: (id: string) => void,
+  onUploadClick: (id: string) => void,
+  onDeleteFile: (id: string) => void
 ): ColumnDef<Track>[] => [
   {
     accessorKey: "coverImage",
@@ -50,6 +52,35 @@ export const getColumns = (
       return (row.getValue<string[]>(id) ?? []).includes(filterValue);
     },
     cell: (info) => (info.getValue<string[]>() ?? []).join(", "),
+  },
+
+  {
+    id: "audio",
+    header: "Audio",
+    enableSorting: false,
+    size: 300,
+    cell: ({ row }) => {
+      const { id, audioFile } = row.original;
+      return audioFile ? (
+        <div className="relative flex items-center gap-2">
+          <audio
+            controls
+            src={`/api/files/${audioFile}`}
+            className="w-full max-w-xs mr-2"
+          />
+          <button
+            className="btn btn-xs btn-circle btn-error btn-ghost absolute top-0 right-0"
+            onClick={() => onDeleteFile(id)}
+          >
+            <X size={12}/>
+          </button>
+        </div>
+      ) : (
+        <button className="btn btn-xs" onClick={() => onUploadClick(id)}>
+          Upload
+        </button>
+      );
+    },
   },
 
   {

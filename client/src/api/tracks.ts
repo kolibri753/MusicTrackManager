@@ -35,3 +35,20 @@ export const updateTrack = async (
 export const deleteTrack = async (id: string): Promise<void> => {
   await axios.delete(`/api/tracks/${id}`);
 };
+
+export const uploadTrackFile = async (
+  id: string,
+  file: File
+): Promise<Track> => {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await axios.post<Track>(`/api/tracks/${id}/upload`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+};
+
+export const deleteTrackFile = async (id: string): Promise<Track> => {
+  const { data } = await axios.delete<Track>(`/api/tracks/${id}/file`);
+  return data;
+};
