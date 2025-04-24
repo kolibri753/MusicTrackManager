@@ -10,8 +10,8 @@ import {
 } from "@tanstack/react-table";
 import { Track } from "@/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FilterSelect, SearchInput } from "@/components";
-import { getColumns } from "./columns";
+import { FilterSelect, SearchInput, SelectModeToggle } from "@/components";
+import { getColumns, SelectionOptions } from "./columns";
 import { PaginationControls } from "./PaginationControls";
 
 interface Props {
@@ -37,6 +37,7 @@ interface Props {
   onDelete(id: string): void;
   onUploadClick(id: string): void;
   onDeleteFile(id: string): void;
+  onBulkDelete(ids: string[]): void;
 }
 
 export const TrackTable: React.FC<Props> = ({
@@ -62,7 +63,11 @@ export const TrackTable: React.FC<Props> = ({
   onDelete,
   onUploadClick,
   onDeleteFile,
+  onBulkDelete,
 }) => {
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const [sorting, setSorting] = useState<SortingState>([
     { id: sort, desc: order === "desc" },
   ]);
@@ -79,9 +84,28 @@ export const TrackTable: React.FC<Props> = ({
     }
   }, [sorting, setSort, setOrder]);
 
+  const toggleId = (id: string) => {
+    const next = new Set(selectedIds);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setSelectedIds(next);
+  };
+  const allVisibleIds = data.map((t) => t.id);
+  const toggleAll = () =>
+    setSelectedIds((prev) =>
+      allVisibleIds.every((id) => prev.has(id))
+        ? new Set()
+        : new Set(allVisibleIds)
+    );
+
   const columns = useMemo(
-    () => getColumns(onEdit, onDelete, onUploadClick, onDeleteFile),
-    [onEdit, onDelete, onUploadClick, onDeleteFile]
+    () =>
+      getColumns(onEdit, onDelete, onUploadClick, onDeleteFile, {
+        selectionMode,
+        selectedIds,
+        onToggleAll: toggleAll,
+        onToggleId: toggleId,
+      } as SelectionOptions),
+    [onEdit, onDelete, onUploadClick, onDeleteFile, selectionMode, selectedIds]
   );
 
   const table = useReactTable({
@@ -102,6 +126,19 @@ export const TrackTable: React.FC<Props> = ({
   return (
     <>
       <div className="flex items-center justify-between mb-4">
+        <SelectModeToggle
+          selectionMode={selectionMode}
+          onToggleMode={() => {
+            setSelectionMode((m) => !m);
+            if (selectionMode) setSelectedIds(new Set());
+          }}
+          selectedCount={selectedIds.size}
+          onBulkDelete={() => {
+            onBulkDelete(Array.from(selectedIds));
+            setSelectedIds(new Set());
+          }}
+          bulkDeleteDisabled={selectedIds.size === 0}
+        />
         <SearchInput
           value={searchTerm}
           onChange={onSearchChange}

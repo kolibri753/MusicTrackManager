@@ -16,6 +16,7 @@ import {
   deleteTrack,
   deleteTrackFile,
   uploadTrackFile,
+  deleteMultipleTracks,
 } from "@/api/tracks";
 import { extractErrorMessage } from "@/helpers";
 
@@ -54,6 +55,7 @@ const TracksPage: React.FC = () => {
   const [deletingFileTrack, setDeletingFileTrack] = useState<Track | null>(
     null
   );
+  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
   const handleCreate = async (form: TrackFormData) => {
     try {
@@ -147,6 +149,30 @@ const TracksPage: React.FC = () => {
     }
   };
 
+  const handleBulkDelete = async (ids: string[]) => {
+    try {
+      const { success, failed } = await deleteMultipleTracks(ids);
+      toast.success(
+        <span data-testid="toast-success">
+          Deleted {success.length} track{success.length !== 1 ? "s" : ""}
+        </span>
+      );
+      if (failed.length > 0) {
+        toast.error(
+          <span data-testid="toast-error">
+            Failed to delete: {failed.join(", ")}
+          </span>
+        );
+      }
+    } catch (err: any) {
+      toast.error(
+        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
+      );
+    } finally {
+      await refetch();
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -185,6 +211,7 @@ const TracksPage: React.FC = () => {
           onDelete={handleDeleteClick}
           onUploadClick={handleUploadClick}
           onDeleteFile={handleDeleteFileClick}
+          onBulkDelete={setBulkDeleteIds}
         />
 
         {isCreating && (
@@ -227,6 +254,21 @@ const TracksPage: React.FC = () => {
             title={`Remove audio from “${deletingFileTrack.title}”?`}
             onConfirm={confirmDeleteFile}
             onCancel={() => setDeletingFileTrack(null)}
+          />
+        )}
+
+        {bulkDeleteIds.length > 0 && (
+          <DeleteConfirmationModal
+            title={`Delete ${bulkDeleteIds.length} track${
+              bulkDeleteIds.length > 1 ? "s" : ""
+            }?`}
+            onConfirm={() => {
+              handleBulkDelete(bulkDeleteIds);
+              setBulkDeleteIds([]);
+            }}
+            onCancel={() => {
+              setBulkDeleteIds([]);
+            }}
           />
         )}
       </div>
