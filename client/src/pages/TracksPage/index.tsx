@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { useTracks, useArtists, useGenres } from "@/hooks";
 import {
   DeleteConfirmationModal,
-  Header,
   Modal,
   TrackForm,
   TrackTable,
@@ -175,7 +174,6 @@ const TracksPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Tracks</h1>
