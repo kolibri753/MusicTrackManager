@@ -52,3 +52,13 @@ export const deleteTrackFile = async (id: string): Promise<Track> => {
   const { data } = await axios.delete<Track>(`/api/tracks/${id}/file`);
   return data;
 };
+
+export const deleteMultipleTracks = async (
+  ids: string[]
+): Promise<{ success: string[]; failed: string[] }> => {
+  const { data } = await axios.post<{
+    success: string[];
+    failed: string[];
+  }>("/api/tracks/delete", { ids });
+  return data;
+};
