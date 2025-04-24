@@ -22,13 +22,26 @@ export const getColumns = (
     size: 80,
   },
 
-  { accessorKey: "title", header: "Title" },
+  {
+    accessorKey: "title",
+    header: "Title",
+    cell: ({ getValue, row }) => (
+      <span data-testid={`track-item-${row.original.id}-title`}>
+        {getValue<string>()}
+      </span>
+    ),
+  },
 
   {
     accessorKey: "artist",
     header: "Artist",
     enableColumnFilter: true,
     filterFn: "includesString",
+    cell: ({ getValue, row }) => (
+      <span data-testid={`track-item-${row.original.id}-artist`}>
+        {getValue<string>()}
+      </span>
+    ),
   },
 
   {
@@ -71,12 +84,17 @@ export const getColumns = (
           <button
             className="btn btn-xs btn-circle btn-error btn-ghost absolute top-0 right-0"
             onClick={() => onDeleteFile(id)}
+            data-testid={`delete-track-${id}`}
           >
-            <X size={12}/>
+            <X size={12} />
           </button>
         </div>
       ) : (
-        <button className="btn btn-xs" onClick={() => onUploadClick(id)}>
+        <button
+          className="btn btn-xs"
+          onClick={() => onUploadClick(id)}
+          data-testid={`upload-track-${id}`}
+        >
           Upload
         </button>
       );
@@ -87,21 +105,26 @@ export const getColumns = (
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row }) => (
-      <div className="flex gap-2">
-        <button
-          className="btn btn-xs btn-ghost"
-          onClick={() => onEdit(row.original.id)}
-        >
-          <Edit2 size={14} />
-        </button>
-        <button
-          className="btn btn-xs btn-error btn-outline"
-          onClick={() => onDelete(row.original.id)}
-        >
-          <Trash2 size={14} />
-        </button>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const id = row.original.id;
+      return (
+        <div className="flex gap-2">
+          <button
+            className="btn btn-xs btn-ghost"
+            onClick={() => onEdit(id)}
+            data-testid={`edit-track-${id}`}
+          >
+            <Edit2 size={14} />
+          </button>
+          <button
+            className="btn btn-xs btn-error btn-outline"
+            onClick={() => onDelete(id)}
+            data-testid={`delete-track-${id}`}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      );
+    },
   },
 ];

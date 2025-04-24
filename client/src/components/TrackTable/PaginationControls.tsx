@@ -15,11 +15,15 @@ export const PaginationControls: React.FC<Props> = ({
   setPage,
   setLimit,
 }) => (
-  <div className="flex items-center justify-end gap-4 mt-4">
+  <div
+    className="flex items-center justify-end gap-4 mt-4"
+    data-testid="pagination"
+  >
     <button
       className="btn btn-sm"
       onClick={() => setPage(page - 1)}
       disabled={page <= 1}
+      data-testid="pagination-prev"
     >
       ← Prev
     </button>
@@ -32,6 +36,7 @@ export const PaginationControls: React.FC<Props> = ({
       className="btn btn-sm"
       onClick={() => setPage(page + 1)}
       disabled={page >= totalPages}
+      data-testid="pagination-next"
     >
       Next →
     </button>
@@ -52,4 +57,3 @@ export const PaginationControls: React.FC<Props> = ({
     </select>
   </div>
 );
-

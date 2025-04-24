@@ -156,6 +156,7 @@ const TracksPage: React.FC = () => {
           <button
             className="btn btn-primary"
             onClick={() => setIsCreating(true)}
+            data-testid="create-track-button"
           >
             New Track
           </button>
