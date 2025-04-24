@@ -7,9 +7,17 @@ import {
   Modal,
   TrackForm,
   TrackTable,
+  UploadFileModal,
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
-import { createTrack, updateTrack, deleteTrack } from "@/api/tracks";
+import {
+  createTrack,
+  updateTrack,
+  deleteTrack,
+  deleteTrackFile,
+  uploadTrackFile,
+} from "@/api/tracks";
+import { extractErrorMessage } from "@/helpers";
 
 const TracksPage: React.FC = () => {
   const {
@@ -42,9 +50,10 @@ const TracksPage: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [deletingTrack, setDeletingTrack] = useState<Track | null>(null);
-
-  const extractMsg = (err: any) =>
-    err?.response?.data?.error || err.message || "Something went wrong";
+  const [uploadingTrack, setUploadingTrack] = useState<Track | null>(null);
+  const [deletingFileTrack, setDeletingFileTrack] = useState<Track | null>(
+    null
+  );
 
   const handleCreate = async (form: TrackFormData) => {
     try {
@@ -53,7 +62,9 @@ const TracksPage: React.FC = () => {
         <span data-testid="toast-success">Track created successfully</span>
       );
     } catch (err: any) {
-      toast.error(<span data-testid="toast-error">{extractMsg(err)}</span>);
+      toast.error(
+        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
+      );
     } finally {
       setIsCreating(false);
       await refetch();
@@ -71,7 +82,9 @@ const TracksPage: React.FC = () => {
         <span data-testid="toast-success">Track updated successfully</span>
       );
     } catch (err: any) {
-      toast.error(<span data-testid="toast-error">{extractMsg(err)}</span>);
+      toast.error(
+        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
+      );
     } finally {
       setEditingTrack(null);
       await refetch();
@@ -89,9 +102,47 @@ const TracksPage: React.FC = () => {
         <span data-testid="toast-success">Track deleted successfully</span>
       );
     } catch (err: any) {
-      toast.error(<span data-testid="toast-error">{extractMsg(err)}</span>);
+      toast.error(
+        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
+      );
     } finally {
       setDeletingTrack(null);
+      await refetch();
+    }
+  };
+
+  const handleUploadClick = (id: string) =>
+    setUploadingTrack(data.find((t) => t.id === id) || null);
+
+  const confirmUpload = async (file: File) => {
+    if (!uploadingTrack) return;
+    try {
+      await uploadTrackFile(uploadingTrack.id, file);
+      toast.success(<span data-testid="toast-success">File uploaded</span>);
+    } catch (err: any) {
+      toast.error(
+        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
+      );
+    } finally {
+      setUploadingTrack(null);
+      await refetch();
+    }
+  };
+
+  const handleDeleteFileClick = (id: string) => {
+    setDeletingFileTrack(data.find((t) => t.id === id) || null);
+  };
+  const confirmDeleteFile = async () => {
+    if (!deletingFileTrack) return;
+    try {
+      await deleteTrackFile(deletingFileTrack.id);
+      toast.success(<span data-testid="toast-success">File removed</span>);
+    } catch (err: any) {
+      toast.error(
+        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
+      );
+    } finally {
+      setDeletingFileTrack(null);
       await refetch();
     }
   };
@@ -131,6 +182,8 @@ const TracksPage: React.FC = () => {
           onSearchChange={setSearch}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onUploadClick={handleUploadClick}
+          onDeleteFile={handleDeleteFileClick}
         />
 
         {isCreating && (
@@ -154,9 +207,25 @@ const TracksPage: React.FC = () => {
 
         {deletingTrack && (
           <DeleteConfirmationModal
-            title={deletingTrack.title}
+            title={`Delete "${deletingTrack.title}"?`}
             onConfirm={confirmDelete}
             onCancel={() => setDeletingTrack(null)}
+          />
+        )}
+
+        {uploadingTrack && (
+          <UploadFileModal
+            track={uploadingTrack}
+            onUpload={confirmUpload}
+            onCancel={() => setUploadingTrack(null)}
+          />
+        )}
+
+        {deletingFileTrack && (
+          <DeleteConfirmationModal
+            title={`Remove audio from “${deletingFileTrack.title}”?`}
+            onConfirm={confirmDeleteFile}
+            onCancel={() => setDeletingFileTrack(null)}
           />
         )}
       </div>

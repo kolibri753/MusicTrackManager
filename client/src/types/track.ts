@@ -6,7 +6,7 @@ export interface Track {
   genres: string[];
   coverImage?: string;
   createdAt: string;
-  fileUrl?: string;
+  audioFile?: string;
 }
 
 export type TrackFormData = Omit<Track, "id" | "createdAt">;
