@@ -5,3 +5,4 @@ export { TrackForm } from "./TrackForm";
 export { TrackTable } from "./TrackTable";
 export { Logo, FilterSelect, SearchInput, TagSelector } from "./common";
 export { Header } from "./layout";
+export { AudioPlayer } from "./AudioPlayer";
