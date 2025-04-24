@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
+import WaveSurfer from "wavesurfer.js";
 import { Play, Pause, X } from "lucide-react";
 
 interface AudioPlayerProps {
@@ -8,69 +9,70 @@ interface AudioPlayerProps {
 }
 
 export function AudioPlayer({ src, id, onRemove }: AudioPlayerProps) {
+  const waveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wavesurfer = useRef<WaveSurfer | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    if (!waveformRef.current || !audioRef.current) return;
 
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-    const onTimeUpdate = () => setProgress(audio.currentTime);
-    const onLoadedMeta = () => setDuration(audio.duration);
+    const ws = WaveSurfer.create({
+      container: waveformRef.current,
+      backend: "MediaElement",
+      media: audioRef.current!,
+      mediaControls: false,
+      url: src,
+      waveColor: "#CBD5E1",
+      progressColor: "#1E40AF",
+      cursorColor: "#1E40AF",
+      height: 48,
+      barWidth: 2,
+      normalize: true,
+      interact: true,
+    });
 
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoadedMeta);
+    wavesurfer.current = ws;
+    ws.on("play", () => setPlaying(true));
+    ws.on("pause", () => setPlaying(false));
+
     return () => {
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoadedMeta);
+      ws.destroy();
+      wavesurfer.current = null;
     };
-  }, []);
+  }, [src]);
 
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    playing ? audio.pause() : audio.play();
-  };
+  const togglePlay = useCallback(() => {
+    wavesurfer.current?.playPause();
+  }, []);
 
   return (
     <div
-      className="relative flex items-center gap-1"
+      className="relative flex items-center gap-2"
       data-testid={`audio-player-${id}`}
     >
-      <audio ref={audioRef} src={src} className="hidden" />
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="auto"
+        className="hidden"
+        data-testid={`audio-element-${id}`}
+      />
 
       <button
         type="button"
         onClick={togglePlay}
         data-testid={playing ? `pause-button-${id}` : `play-button-${id}`}
-        className="btn btn-xs"
+        className="btn btn-xs btn-outline"
         aria-label={playing ? "Pause" : "Play"}
       >
         {playing ? <Pause size={16} /> : <Play size={16} />}
       </button>
 
-      <input
-        type="range"
-        min={0}
-        max={duration || 1}
-        step={0.01}
-        value={progress}
-        onChange={(e) => {
-          const audio = audioRef.current!;
-          const seek = parseFloat(e.currentTarget.value);
-          audio.currentTime = seek;
-          setProgress(seek);
-        }}
+      <div
+        ref={waveformRef}
+        className="flex-1 overflow-hidden cursor-pointer"
         data-testid={`audio-progress-${id}`}
-        className="range range-xs range-primary flex-1"
       />
 
       {onRemove && (
