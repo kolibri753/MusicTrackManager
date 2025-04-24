@@ -1,22 +1,22 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useTheme } from "@/context/ThemeContext";
+import { Footer, Header } from "@/components";
 import TracksPage from "@/pages/TracksPage";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const { theme } = useTheme();
-  const toastTheme =
-    theme === "dark"
-      ? "light"
-      : "dark";
+  const toastTheme = theme === "dark" ? "light" : "dark";
 
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="/" element={<Navigate to="/tracks" />} />
         <Route path="/tracks" element={<TracksPage />} />
       </Routes>
+      <Footer />
 
       <ToastContainer
         data-testid="toast-container"

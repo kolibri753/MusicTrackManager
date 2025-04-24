@@ -10,5 +10,5 @@ export {
   TagSelector,
   SelectModeToggle,
 } from "./common";
-export { Header } from "./layout";
+export { Header, Footer } from "./layout";
 export { AudioPlayer } from "./AudioPlayer";
