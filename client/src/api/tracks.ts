@@ -49,8 +49,17 @@ export const uploadTrackFile = async (
 };
 
 export const deleteTrackFile = async (id: string): Promise<Track> => {
-  const { data } = await axios.delete<Track>(`/api/tracks/${id}/file`);
-  return data;
+  try {
+    const { data } = await axios.delete<Track>(`/api/tracks/${id}/file`);
+    return data;
+  } catch (err: any) {
+    if (err.response?.status === 404) {
+      const { data: track } = await axios.get<Track>(`/api/tracks/${id}`);
+      const { audioFile, ...rest } = track;
+      return rest as Track;
+    }
+    throw err;
+  }
 };
 
 export const deleteMultipleTracks = async (

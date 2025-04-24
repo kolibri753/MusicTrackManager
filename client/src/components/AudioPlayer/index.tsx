@@ -11,17 +11,22 @@ interface AudioPlayerProps {
 export function AudioPlayer({ src, id, onRemove }: AudioPlayerProps) {
   const waveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const wavesurfer = useRef<WaveSurfer | null>(null);
+  const wsRef = useRef<WaveSurfer | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!waveformRef.current || !audioRef.current) return;
+    setError(false);
+
+    const audioEl = audioRef.current;
+    const handleAudioError = () => setError(true);
+    audioEl.addEventListener("error", handleAudioError);
 
     const ws = WaveSurfer.create({
       container: waveformRef.current,
       backend: "MediaElement",
-      media: audioRef.current!,
-      mediaControls: false,
+      media: audioEl,
       url: src,
       waveColor: "#CBD5E1",
       progressColor: "#1E40AF",
@@ -32,25 +37,46 @@ export function AudioPlayer({ src, id, onRemove }: AudioPlayerProps) {
       interact: true,
     });
 
-    wavesurfer.current = ws;
+    wsRef.current = ws;
     ws.on("play", () => setPlaying(true));
     ws.on("pause", () => setPlaying(false));
+    ws.on("error", () => setError(true));
 
     return () => {
+      audioEl.removeEventListener("error", handleAudioError);
       ws.destroy();
-      wavesurfer.current = null;
+      wsRef.current = null;
     };
   }, [src]);
 
   const togglePlay = useCallback(() => {
-    wavesurfer.current?.playPause();
-  }, []);
+    if (!wsRef.current || error) return;
+    wsRef.current.playPause();
+  }, [error]);
+
+  if (error) {
+    return (
+      <div
+        className="alert alert-error flex items-center justify-between"
+        data-testid={`audio-error-${id}`}
+      >
+        <span>File is corrupted</span>
+        {onRemove && (
+          <button
+            className="btn btn-xs btn-ghost btn-error btn-circle"
+            onClick={onRemove}
+            data-testid={`delete-track-${id}`}
+            aria-label="Remove audio"
+          >
+            <X size={12} />
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="relative flex items-center gap-2"
-      data-testid={`audio-player-${id}`}
-    >
+    <div className="flex items-center gap-2" data-testid={`audio-player-${id}`}>
       <audio
         ref={audioRef}
         src={src}
