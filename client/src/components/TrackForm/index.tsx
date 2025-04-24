@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { TagSelector } from "../Form/TagSelector";
+import { TagSelector } from "@/components";
 import { Track, TrackFormData } from "@/types";
 
 export function TrackForm({
@@ -52,7 +52,6 @@ export function TrackForm({
       onSubmit={handleSubmit}
       className="space-y-4"
     >
-      {/** Title **/}
       <div>
         <label htmlFor="title" className="label">
           <span className="label-text">Title</span>
@@ -73,7 +72,6 @@ export function TrackForm({
         )}
       </div>
 
-      {/** Artist **/}
       <div>
         <label htmlFor="artist" className="label">
           <span className="label-text">Artist</span>
@@ -94,7 +92,6 @@ export function TrackForm({
         )}
       </div>
 
-      {/** Album **/}
       <div>
         <label htmlFor="album" className="label">
           <span className="label-text">Album</span>
@@ -110,7 +107,6 @@ export function TrackForm({
         />
       </div>
 
-      {/** Genres **/}
       <div>
         <label className="label">
           <span className="label-text">Genres</span>
@@ -128,7 +124,6 @@ export function TrackForm({
         )}
       </div>
 
-      {/** Cover Image **/}
       <div>
         <label htmlFor="coverImage" className="label">
           <span className="label-text">Cover Image URL</span>
@@ -149,7 +144,6 @@ export function TrackForm({
         )}
       </div>
 
-      {/** Actions **/}
       <div className="flex justify-end gap-2">
         <button
           type="button"
