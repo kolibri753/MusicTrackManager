@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchTracks } from "@/api/tracks";
+import { trackService } from "@/api";
 import type { Track, Meta } from "@/types/track";
 
+/**
+ * Custom hook to paginate, sort, filter, and search tracks.
+ */
 export function useTracks(initialLimit = 10) {
   const [data, setData] = useState<Track[]>([]);
   const [meta, setMeta] = useState<Meta>({
@@ -10,29 +13,37 @@ export function useTracks(initialLimit = 10) {
     limit: initialLimit,
     totalPages: 1,
   });
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(initialLimit);
+
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(initialLimit);
   const [sort, setSort] = useState<keyof Track>("title");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [filterGenre, setFilterGenre] = useState<string>("");
+  const [filterArtist, setFilterArtist] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
 
-  const [filterGenre, setFilterGenre] = useState("");
-  const [filterArtist, setFilterArtist] = useState("");
-  const [search, setSearch] = useState("");
-
+  /**
+   * Fetches the current page of tracks with applied filters & sorting.
+   */
   const load = useCallback(async () => {
-    const res = await fetchTracks(
-      page,
-      limit,
-      sort,
-      order,
-      filterGenre,
-      filterArtist,
-      search
-    );
-    setData(res.data);
-    setMeta(res.meta);
+    try {
+      const result = await trackService.fetchTracks(
+        page,
+        limit,
+        sort,
+        order,
+        filterGenre,
+        filterArtist,
+        search
+      );
+      setData(result.data);
+      setMeta(result.meta);
+    } catch (err) {
+      console.error("Failed to load tracks:", err);
+    }
   }, [page, limit, sort, order, filterGenre, filterArtist, search]);
 
+  // Reload whenever dependencies change
   useEffect(() => {
     load();
   }, [load]);
@@ -44,15 +55,15 @@ export function useTracks(initialLimit = 10) {
     limit,
     sort,
     order,
+    filterGenre,
+    filterArtist,
+    search,
     setPage,
     setLimit,
     setSort,
     setOrder,
-    filterGenre,
     setFilterGenre,
-    filterArtist,
     setFilterArtist,
-    search,
     setSearch,
     refetch: load,
   };
