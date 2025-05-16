@@ -9,14 +9,7 @@ import {
   UploadFileModal,
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
-import {
-  createTrack,
-  updateTrack,
-  deleteTrack,
-  deleteTrackFile,
-  uploadTrackFile,
-  deleteMultipleTracks,
-} from "@/api/tracks";
+import { trackService } from "@/api";
 import { extractErrorMessage } from "@/helpers";
 
 const TracksPage: React.FC = () => {
@@ -41,7 +34,9 @@ const TracksPage: React.FC = () => {
   } = useTracks();
 
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages || 1);
+    if (page > totalPages) {
+      setPage(totalPages || 1);
+    }
   }, [page, totalPages, setPage]);
 
   const artists = useArtists();
@@ -58,99 +53,99 @@ const TracksPage: React.FC = () => {
 
   const handleCreate = async (form: TrackFormData) => {
     try {
-      await createTrack(form);
+      await trackService.createTrack(form);
       toast.success(
         <span data-testid="toast-success">Track created successfully</span>
       );
+      await refetch();
     } catch (err: any) {
       toast.error(
         <span data-testid="toast-error">{extractErrorMessage(err)}</span>
       );
     } finally {
       setIsCreating(false);
-      await refetch();
     }
   };
 
   const handleEditClick = (id: string) => {
-    setEditingTrack(data.find((t) => t.id === id) || null);
+    setEditingTrack(data.find((t) => t.id === id) ?? null);
   };
   const handleUpdate = async (form: TrackFormData) => {
     if (!editingTrack) return;
     try {
-      await updateTrack(editingTrack.id, form);
+      await trackService.updateTrack(editingTrack.id, form);
       toast.success(
         <span data-testid="toast-success">Track updated successfully</span>
       );
+      await refetch();
     } catch (err: any) {
       toast.error(
         <span data-testid="toast-error">{extractErrorMessage(err)}</span>
       );
     } finally {
       setEditingTrack(null);
-      await refetch();
     }
   };
 
   const handleDeleteClick = (id: string) => {
-    setDeletingTrack(data.find((t) => t.id === id) || null);
+    setDeletingTrack(data.find((t) => t.id === id) ?? null);
   };
   const confirmDelete = async () => {
     if (!deletingTrack) return;
     try {
-      await deleteTrack(deletingTrack.id);
+      await trackService.deleteTrack(deletingTrack.id);
       toast.success(
         <span data-testid="toast-success">Track deleted successfully</span>
       );
+      await refetch();
     } catch (err: any) {
       toast.error(
         <span data-testid="toast-error">{extractErrorMessage(err)}</span>
       );
     } finally {
       setDeletingTrack(null);
-      await refetch();
     }
   };
 
-  const handleUploadClick = (id: string) =>
-    setUploadingTrack(data.find((t) => t.id === id) || null);
-
+  const handleUploadClick = (id: string) => {
+    setUploadingTrack(data.find((t) => t.id === id) ?? null);
+  };
   const confirmUpload = async (file: File) => {
     if (!uploadingTrack) return;
     try {
-      await uploadTrackFile(uploadingTrack.id, file);
+      await trackService.uploadTrackFile(uploadingTrack.id, file);
       toast.success(<span data-testid="toast-success">File uploaded</span>);
+      await refetch();
     } catch (err: any) {
       toast.error(
         <span data-testid="toast-error">{extractErrorMessage(err)}</span>
       );
     } finally {
       setUploadingTrack(null);
-      await refetch();
     }
   };
 
   const handleDeleteFileClick = (id: string) => {
-    setDeletingFileTrack(data.find((t) => t.id === id) || null);
+    setDeletingFileTrack(data.find((t) => t.id === id) ?? null);
   };
   const confirmDeleteFile = async () => {
     if (!deletingFileTrack) return;
     try {
-      await deleteTrackFile(deletingFileTrack.id);
+      await trackService.deleteTrackFile(deletingFileTrack.id);
       toast.success(<span data-testid="toast-success">File removed</span>);
+      await refetch();
     } catch (err: any) {
       toast.error(
         <span data-testid="toast-error">{extractErrorMessage(err)}</span>
       );
     } finally {
       setDeletingFileTrack(null);
-      await refetch();
     }
   };
 
   const handleBulkDelete = async (ids: string[]) => {
     try {
-      const { success, failed } = await deleteMultipleTracks(ids);
+      const { success, failed } = await trackService.deleteMultipleTracks(ids);
       toast.success(
         <span data-testid="toast-success">
           Deleted {success.length} track{success.length !== 1 ? "s" : ""}
@@ -163,12 +158,13 @@ const TracksPage: React.FC = () => {
           </span>
         );
       }
+      await refetch();
     } catch (err: any) {
       toast.error(
         <span data-testid="toast-error">{extractErrorMessage(err)}</span>
       );
     } finally {
-      await refetch();
+      setBulkDeleteIds([]);
     }
   };
 
@@ -260,13 +256,8 @@ const TracksPage: React.FC = () => {
             title={`Delete ${bulkDeleteIds.length} track${
               bulkDeleteIds.length > 1 ? "s" : ""
             }?`}
-            onConfirm={() => {
-              handleBulkDelete(bulkDeleteIds);
-              setBulkDeleteIds([]);
-            }}
-            onCancel={() => {
-              setBulkDeleteIds([]);
-            }}
+            onConfirm={() => handleBulkDelete(bulkDeleteIds)}
+            onCancel={() => setBulkDeleteIds([])}
           />
         )}
       </div>
