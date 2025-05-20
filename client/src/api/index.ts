@@ -1,10 +1,10 @@
 import { AxiosHttpClient } from "./httpClient";
-import { ArtistService, IArtistService } from "./artistService";
-import { GenreService, IGenreService } from "./genreService";
-import { TrackService, ITrackService } from "./trackService";
+import { ArtistService } from "./artistService";
+import { GenreService } from "./genreService";
+import { TrackService } from "./trackService";
 
-const httpClient = new AxiosHttpClient();
+const http = new AxiosHttpClient();
 
-export const artistService: IArtistService = new ArtistService(httpClient);
-export const genreService: IGenreService = new GenreService(httpClient);
-export const trackService: ITrackService = new TrackService(httpClient);
+export const artistService = new ArtistService(http);
+export const genreService = new GenreService(http);
+export const trackService = new TrackService(http);
