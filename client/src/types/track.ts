@@ -1,5 +1,6 @@
 export interface Track {
   id: string;
+  slug: string;
   title: string;
   artist: string;
   album?: string;
@@ -9,7 +10,7 @@ export interface Track {
   audioFile?: string;
 }
 
-export type TrackFormData = Omit<Track, "id" | "createdAt">;
+export type TrackFormData = Omit<Track, "id" | "slug" | "createdAt">;
 
 export interface Meta {
   total: number;
