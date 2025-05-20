@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
 import { TagSelector } from "@/components";
 import { Track, TrackFormData } from "@/types";
+import { useGenres } from "@/hooks";
 
 export function TrackForm({
   initialData,
@@ -11,6 +12,12 @@ export function TrackForm({
   onSubmit(data: TrackFormData): Promise<void>;
   onCancel(): void;
 }) {
+  const {
+    genres: genreList,
+    loading: genresLoading,
+    error: genresError,
+  } = useGenres();
+
   const [form, setForm] = useState<TrackFormData>({
     title: initialData?.title || "",
     artist: initialData?.artist || "",
@@ -114,6 +121,9 @@ export function TrackForm({
         <div data-testid="genre-selector">
           <TagSelector
             value={form.genres}
+            options={genreList}
+            loading={genresLoading}
+            error={!!genresError}
             onChange={(genres) => setForm({ ...form, genres })}
           />
         </div>

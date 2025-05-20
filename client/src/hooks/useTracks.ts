@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { trackService } from "@/api";
-import type { Track, Meta } from "@/types/track";
+import type { Track, Meta } from "@/types";
 
 /**
- * Custom hook to paginate, sort, filter, and search tracks.
+ * Fetch and control paged track data
  */
 export function useTracks(initialLimit = 10) {
   const [data, setData] = useState<Track[]>([]);
@@ -13,58 +13,62 @@ export function useTracks(initialLimit = 10) {
     limit: initialLimit,
     totalPages: 1,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(initialLimit);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(initialLimit);
   const [sort, setSort] = useState<keyof Track>("title");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [filterGenre, setFilterGenre] = useState<string>("");
-  const [filterArtist, setFilterArtist] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
+  const [genre, setGenre] = useState("");
+  const [artist, setArtist] = useState("");
+  const [search, setSearch] = useState("");
 
-  /**
-   * Fetches the current page of tracks with applied filters & sorting.
-   */
-  const load = useCallback(async () => {
-    try {
-      const result = await trackService.fetchTracks(
-        page,
-        limit,
-        sort,
-        order,
-        filterGenre,
-        filterArtist,
-        search
-      );
-      setData(result.data);
-      setMeta(result.meta);
-    } catch (err) {
-      console.error("Failed to load tracks:", err);
-    }
-  }, [page, limit, sort, order, filterGenre, filterArtist, search]);
+  const fetchData = useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await trackService.fetchTracks(
+          { page, limit, sort, order, genre, artist, search },
+          signal
+        );
+        setData(res.data);
+        setMeta(res.meta);
+      } catch (err: any) {
+        if (err.name !== "AbortError") setError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page, limit, sort, order, genre, artist, search]
+  );
 
-  // Reload whenever dependencies change
   useEffect(() => {
-    load();
-  }, [load]);
+    const ctrl = new AbortController();
+    fetchData(ctrl.signal);
+    return () => ctrl.abort();
+  }, [fetchData]);
 
   return {
     data,
     meta,
+    loading,
+    error,
     page,
     limit,
     sort,
     order,
-    filterGenre,
-    filterArtist,
+    genre,
+    artist,
     search,
     setPage,
     setLimit,
     setSort,
     setOrder,
-    setFilterGenre,
-    setFilterArtist,
+    setGenre,
+    setArtist,
     setSearch,
-    refetch: load,
+    refetch: () => fetchData(),
   };
 }
