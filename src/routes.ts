@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 import {
   addTrack,
   deleteTrackFile,
-  getAllArtists,
   getAllTracks,
   getTrack,
   removeTrack,
@@ -10,6 +9,7 @@ import {
   updateTrackById,
   uploadTrackFile,
 } from "./controllers/tracks.controller";
+import { getAllArtists } from "./controllers/artists.controller";
 import { getAllGenres } from "./controllers/genres.controller";
 
 export default async function routes(fastify: FastifyInstance) {
