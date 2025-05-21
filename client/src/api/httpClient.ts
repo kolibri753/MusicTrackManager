@@ -1,60 +1,46 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-/**
- * Abstraction for HTTP operations.
+/** 
+ * HTTP abstraction 
  */
 export interface IHttpClient {
-  get<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
-  post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
-  put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
-  delete<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  get<T>(url: string, cfg?: AxiosRequestConfig): Promise<T>;
+  post<T>(url: string, data?: unknown, cfg?: AxiosRequestConfig): Promise<T>;
+  put<T>(url: string, data?: unknown, cfg?: AxiosRequestConfig): Promise<T>;
+  delete<T>(url: string, cfg?: AxiosRequestConfig): Promise<T>;
 }
 
-/**
- * Axios-based implementation of IHttpClient.
+/** 
+ * Axios implementation 
  */
 export class AxiosHttpClient implements IHttpClient {
   constructor(private readonly axiosInstance: AxiosInstance = axios) {}
 
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.axiosInstance.get<T>(
-      url,
-      config
-    );
-    return response.data;
+  async get<T>(url: string, cfg?: AxiosRequestConfig): Promise<T> {
+    const res: AxiosResponse<T> = await this.axiosInstance.get(url, cfg);
+    return res.data;
   }
 
   async post<T>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig
+    cfg?: AxiosRequestConfig
   ): Promise<T> {
-    const response: AxiosResponse<T> = await this.axiosInstance.post<T>(
-      url,
-      data,
-      config
-    );
-    return response.data;
+    const res: AxiosResponse<T> = await this.axiosInstance.post(url, data, cfg);
+    return res.data;
   }
 
   async put<T>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig
+    cfg?: AxiosRequestConfig
   ): Promise<T> {
-    const response: AxiosResponse<T> = await this.axiosInstance.put<T>(
-      url,
-      data,
-      config
-    );
-    return response.data;
+    const res: AxiosResponse<T> = await this.axiosInstance.put(url, data, cfg);
+    return res.data;
   }
 
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.axiosInstance.delete<T>(
-      url,
-      config
-    );
-    return response.data;
+  async delete<T>(url: string, cfg?: AxiosRequestConfig): Promise<T> {
+    const res: AxiosResponse<T> = await this.axiosInstance.delete(url, cfg);
+    return res.data;
   }
 }

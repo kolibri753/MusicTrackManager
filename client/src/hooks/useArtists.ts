@@ -1,28 +1,32 @@
-import { useState, useEffect } from "react";
-import { artistService } from "@/api";
+import { useEffect, useState } from 'react';
+import { artistService } from '@/api';
 
 /**
- * Custom hook to fetch and keep an up-to-date list of artist names.
+ * Get the list of artist names
  */
-export function useArtists(): string[] {
+export function useArtists() {
   const [artists, setArtists] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    const ctrl = new AbortController();
 
     artistService
-      .listArtists()
+      .list({ signal: ctrl.signal })
       .then((data) => {
-        if (mounted) setArtists(data);
+        setArtists(data);
+        setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load artists:", err);
+        if (err.name !== 'AbortError') {
+          setError(err);
+          setLoading(false);
+        }
       });
 
-    return () => {
-      mounted = false;
-    };
+    return () => ctrl.abort();
   }, []);
 
-  return artists;
+  return { artists, loading, error };
 }

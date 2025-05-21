@@ -1,28 +1,32 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { genreService } from "@/api";
 
 /**
- * Custom hook to fetch and keep an up-to-date list of genre names.
+ * Get the list of genre names
  */
-export function useGenres(): string[] {
+export function useGenres() {
   const [genres, setGenres] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    const ctrl = new AbortController();
 
     genreService
-      .listGenres()
+      .list({ signal: ctrl.signal })
       .then((data) => {
-        if (mounted) setGenres(data);
+        setGenres(data);
+        setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load genres:", err);
+        if (err.name !== "AbortError") {
+          setError(err);
+          setLoading(false);
+        }
       });
 
-    return () => {
-      mounted = false;
-    };
+    return () => ctrl.abort();
   }, []);
 
-  return genres;
+  return { genres, loading, error };
 }

@@ -1,44 +1,45 @@
+import { ListParams } from "@/types";
 import { IHttpClient } from "./httpClient";
 
 /**
- * Generic CRUD service. T is the entity type; CreateDto describes input for create/update.
+ * Generic CRUD wrapper
  */
 export abstract class BaseService<T, CreateDto = Partial<T>> {
-  constructor(
+  protected constructor(
     protected readonly http: IHttpClient,
-    private readonly resource: string
+    protected readonly resource: string
   ) {}
 
   /**
-   * List all resources, with optional query params.
+   * GET /resource
    */
-  list(params?: Record<string, unknown>): Promise<T[]> {
+  list<P extends ListParams = ListParams>(params?: P): Promise<T[]> {
     return this.http.get<T[]>(`/api/${this.resource}`, { params });
   }
 
   /**
-   * Get single resource by ID.
+   * GET /resource/:id
    */
   getById(id: string): Promise<T> {
     return this.http.get<T>(`/api/${this.resource}/${id}`);
   }
 
   /**
-   * Create a new resource.
+   * POST /resource
    */
   create(dto: CreateDto): Promise<T> {
     return this.http.post<T>(`/api/${this.resource}`, dto);
   }
 
   /**
-   * Update an existing resource by ID.
+   * PUT /resource/:id
    */
   update(id: string, dto: CreateDto): Promise<T> {
     return this.http.put<T>(`/api/${this.resource}/${id}`, dto);
   }
 
   /**
-   * Delete a resource by ID.
+   * DELETE /resource/:id
    */
   delete(id: string): Promise<void> {
     return this.http.delete<void>(`/api/${this.resource}/${id}`);

@@ -18,6 +18,10 @@ interface Props {
   data: Track[];
   genres: string[];
   artists: string[];
+  genresLoading?: boolean;
+  artistsLoading?: boolean;
+  genresError?: boolean;
+  artistsError?: boolean;
   page: number;
   totalPages: number;
   limit: number;
@@ -44,6 +48,10 @@ export const TrackTable: React.FC<Props> = ({
   data,
   genres,
   artists,
+  genresLoading,
+  artistsLoading,
+  genresError,
+  artistsError,
   page,
   totalPages,
   limit,
@@ -150,6 +158,8 @@ export const TrackTable: React.FC<Props> = ({
             label="Artists"
             options={artists}
             value={filterArtist}
+            loading={artistsLoading}
+            error={artistsError}
             dataTestId="filter-artist"
             onChange={onFilterArtistChange}
           />
@@ -157,6 +167,8 @@ export const TrackTable: React.FC<Props> = ({
             label="Genres"
             options={genres}
             value={filterGenre}
+            loading={genresLoading}
+            error={genresError}
             dataTestId="filter-genre"
             onChange={onFilterGenreChange}
           />

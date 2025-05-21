@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { useTracks, useArtists, useGenres } from "@/hooks";
 import {
   DeleteConfirmationModal,
@@ -10,7 +9,7 @@ import {
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
 import { trackService } from "@/api";
-import { extractErrorMessage } from "@/helpers";
+import { extractErrorMessage, showToastMessage } from "@/helpers";
 
 const TracksPage: React.FC = () => {
   const {
@@ -24,145 +23,114 @@ const TracksPage: React.FC = () => {
     order,
     setSort,
     setOrder,
-    filterGenre,
-    setFilterGenre,
-    filterArtist,
-    setFilterArtist,
+    genre: filterGenre,
+    setGenre: setFilterGenre,
+    artist: filterArtist,
+    setArtist: setFilterArtist,
     search,
     setSearch,
     refetch,
   } = useTracks();
 
   useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages || 1);
-    }
+    if (page > totalPages) setPage(totalPages || 1);
   }, [page, totalPages, setPage]);
 
-  const artists = useArtists();
-  const genres = useGenres();
+  const {
+    genres: genreList,
+    loading: genresLoading,
+    error: genresError,
+  } = useGenres();
+
+  const {
+    artists: artistList,
+    loading: artistsLoading,
+    error: artistsError,
+  } = useArtists();
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [deletingTrack, setDeletingTrack] = useState<Track | null>(null);
   const [uploadingTrack, setUploadingTrack] = useState<Track | null>(null);
-  const [deletingFileTrack, setDeletingFileTrack] = useState<Track | null>(
-    null
-  );
+  const [deletingFileTrack, setDeletingFile] = useState<Track | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
   const handleCreate = async (form: TrackFormData) => {
     try {
-      await trackService.createTrack(form);
-      toast.success(
-        <span data-testid="toast-success">Track created successfully</span>
-      );
+      await trackService.create(form);
+      showToastMessage("success", "Track created successfully");
       await refetch();
-    } catch (err: any) {
-      toast.error(
-        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
-      );
+    } catch (e) {
+      showToastMessage("error", extractErrorMessage(e));
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleEditClick = (id: string) => {
-    setEditingTrack(data.find((t) => t.id === id) ?? null);
-  };
   const handleUpdate = async (form: TrackFormData) => {
     if (!editingTrack) return;
     try {
-      await trackService.updateTrack(editingTrack.id, form);
-      toast.success(
-        <span data-testid="toast-success">Track updated successfully</span>
-      );
+      await trackService.update(editingTrack.id, form);
+      showToastMessage("success", "Track updated successfully");
       await refetch();
-    } catch (err: any) {
-      toast.error(
-        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
-      );
+    } catch (e) {
+      showToastMessage("error", extractErrorMessage(e));
     } finally {
       setEditingTrack(null);
     }
   };
 
-  const handleDeleteClick = (id: string) => {
-    setDeletingTrack(data.find((t) => t.id === id) ?? null);
-  };
   const confirmDelete = async () => {
     if (!deletingTrack) return;
     try {
-      await trackService.deleteTrack(deletingTrack.id);
-      toast.success(
-        <span data-testid="toast-success">Track deleted successfully</span>
-      );
+      await trackService.delete(deletingTrack.id);
+      showToastMessage("success", "Track deleted successfully");
       await refetch();
-    } catch (err: any) {
-      toast.error(
-        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
-      );
+    } catch (e) {
+      showToastMessage("error", extractErrorMessage(e));
     } finally {
       setDeletingTrack(null);
     }
   };
 
-  const handleUploadClick = (id: string) => {
-    setUploadingTrack(data.find((t) => t.id === id) ?? null);
-  };
   const confirmUpload = async (file: File) => {
     if (!uploadingTrack) return;
     try {
       await trackService.uploadTrackFile(uploadingTrack.id, file);
-      toast.success(<span data-testid="toast-success">File uploaded</span>);
+      showToastMessage("success", "File uploaded");
       await refetch();
-    } catch (err: any) {
-      toast.error(
-        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
-      );
+    } catch (e) {
+      showToastMessage("error", extractErrorMessage(e));
     } finally {
       setUploadingTrack(null);
     }
   };
 
-  const handleDeleteFileClick = (id: string) => {
-    setDeletingFileTrack(data.find((t) => t.id === id) ?? null);
-  };
   const confirmDeleteFile = async () => {
     if (!deletingFileTrack) return;
     try {
       await trackService.deleteTrackFile(deletingFileTrack.id);
-      toast.success(<span data-testid="toast-success">File removed</span>);
+      showToastMessage("success", "File removed");
       await refetch();
-    } catch (err: any) {
-      toast.error(
-        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
-      );
+    } catch (e) {
+      showToastMessage("error", extractErrorMessage(e));
     } finally {
-      setDeletingFileTrack(null);
+      setDeletingFile(null);
     }
   };
 
   const handleBulkDelete = async (ids: string[]) => {
     try {
       const { success, failed } = await trackService.deleteMultipleTracks(ids);
-      toast.success(
-        <span data-testid="toast-success">
-          Deleted {success.length} track{success.length !== 1 ? "s" : ""}
-        </span>
+      showToastMessage(
+        "success",
+        `Deleted ${success.length} track${success.length === 1 ? "" : "s"}`
       );
-      if (failed.length > 0) {
-        toast.error(
-          <span data-testid="toast-error">
-            Failed to delete: {failed.join(", ")}
-          </span>
-        );
-      }
+      if (failed.length)
+        showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
       await refetch();
-    } catch (err: any) {
-      toast.error(
-        <span data-testid="toast-error">{extractErrorMessage(err)}</span>
-      );
+    } catch (e) {
+      showToastMessage("error", extractErrorMessage(e));
     } finally {
       setBulkDeleteIds([]);
     }
@@ -184,8 +152,12 @@ const TracksPage: React.FC = () => {
 
         <TrackTable
           data={data}
-          genres={genres}
-          artists={artists}
+          genres={genreList}
+          artists={artistList}
+          genresLoading={genresLoading}
+          genresError={!!genresError}
+          artistsLoading={artistsLoading}
+          artistsError={!!artistsError}
           page={page}
           totalPages={totalPages}
           limit={limit}
@@ -201,10 +173,18 @@ const TracksPage: React.FC = () => {
           onFilterArtistChange={setFilterArtist}
           search={search}
           onSearchChange={setSearch}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-          onUploadClick={handleUploadClick}
-          onDeleteFile={handleDeleteFileClick}
+          onEdit={(id) =>
+            setEditingTrack(data.find((t) => t.id === id) ?? null)
+          }
+          onDelete={(id) =>
+            setDeletingTrack(data.find((t) => t.id === id) ?? null)
+          }
+          onUploadClick={(id) =>
+            setUploadingTrack(data.find((t) => t.id === id) ?? null)
+          }
+          onDeleteFile={(id) =>
+            setDeletingFile(data.find((t) => t.id === id) ?? null)
+          }
           onBulkDelete={setBulkDeleteIds}
         />
 
@@ -247,7 +227,7 @@ const TracksPage: React.FC = () => {
           <DeleteConfirmationModal
             title={`Remove audio from “${deletingFileTrack.title}”?`}
             onConfirm={confirmDeleteFile}
-            onCancel={() => setDeletingFileTrack(null)}
+            onCancel={() => setDeletingFile(null)}
           />
         )}
 

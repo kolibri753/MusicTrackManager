@@ -8,7 +8,6 @@ import {
   deleteMultipleTracks,
   saveAudioFile,
   deleteAudioFile,
-  getArtists,
 } from "../utils/db";
 import { createSlug } from "../utils/slug";
 import {
@@ -51,19 +50,6 @@ export const getAllTracks: RouteHandler<ListTracksQuery> = async (
     };
 
     return reply.code(200).send(response);
-  } catch (error) {
-    request.log.error(error);
-    return reply.code(500).send({ error: "Internal Server Error" });
-  }
-};
-
-/**
- * Get all artists (distinct)
- */
-export const getAllArtists: RouteHandler<{}> = async (request, reply) => {
-  try {
-    const artists = await getArtists();
-    return reply.code(200).send(artists);
   } catch (error) {
     request.log.error(error);
     return reply.code(500).send({ error: "Internal Server Error" });
