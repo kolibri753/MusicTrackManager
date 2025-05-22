@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTracks, useArtists, useGenres } from "@/hooks";
 import {
   DeleteConfirmationModal,
@@ -32,6 +32,7 @@ const TracksPage: React.FC = () => {
     setSearch,
     refetch: refetchTracks,
   } = useTracks();
+  const memoData = useMemo(() => data, [data]);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages || 1);
@@ -151,17 +152,30 @@ const TracksPage: React.FC = () => {
     }
   };
 
-  const openEdit = (id: string) =>
-    setEditingTrack(data.find((t) => t.id === id) ?? null);
+  const openEdit = useCallback(
+    (id: string) => setEditingTrack(data.find((t) => t.id === id) ?? null),
+    [data]
+  );
 
-  const openDelete = (id: string) =>
-    setDeletingTrack(data.find((t) => t.id === id) ?? null);
+  const openDelete = useCallback(
+    (id: string) => setDeletingTrack(data.find((t) => t.id === id) ?? null),
+    [data]
+  );
 
-  const openUpload = (id: string) =>
-    setUploadingTrack(data.find((t) => t.id === id) ?? null);
+  const openUpload = useCallback(
+    (id: string) => setUploadingTrack(data.find((t) => t.id === id) ?? null),
+    [data]
+  );
 
-  const openDeleteFile = (id: string) =>
-    setDeletingFile(data.find((t) => t.id === id) ?? null);
+  const openDeleteFile = useCallback(
+    (id: string) => setDeletingFile(data.find((t) => t.id === id) ?? null),
+    [data]
+  );
+
+  const triggerBulkDelete = useCallback(
+    (ids: string[]) => setBulkDeleteIds(ids),
+    []
+  );
 
   return (
     <div className="min-h-screen">
@@ -197,7 +211,7 @@ const TracksPage: React.FC = () => {
         />
 
         <TrackTable
-          data={data}
+          data={memoData}
           sort={sort}
           order={order}
           setSort={setSort}
@@ -211,7 +225,7 @@ const TracksPage: React.FC = () => {
           onDelete={openDelete}
           onUploadClick={openUpload}
           onDeleteFile={openDeleteFile}
-          onBulkDelete={setBulkDeleteIds}
+          onBulkDelete={triggerBulkDelete}
         />
 
         {isCreating && (
