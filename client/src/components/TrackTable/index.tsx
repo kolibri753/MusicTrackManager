@@ -1,42 +1,28 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
   flexRender,
   SortingState,
-  ColumnFiltersState,
 } from "@tanstack/react-table";
 import { Track } from "@/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FilterSelect, SearchInput, SelectModeToggle } from "@/components";
+import { SelectModeToggle } from "@/components";
 import { getColumns, SelectionOptions } from "./columns";
 import { PaginationControls } from "./PaginationControls";
 
-interface Props {
+export interface TrackTableProps {
   data: Track[];
-  genres: string[];
-  artists: string[];
-  genresLoading?: boolean;
-  artistsLoading?: boolean;
-  genresError?: boolean;
-  artistsError?: boolean;
+  sort: keyof Track;
+  order: "asc" | "desc";
+  setSort(v: keyof Track): void;
+  setOrder(v: "asc" | "desc"): void;
   page: number;
   totalPages: number;
   limit: number;
   setPage(p: number): void;
   setLimit(l: number): void;
-  sort: keyof Track;
-  order: "asc" | "desc";
-  setSort(f: keyof Track): void;
-  setOrder(o: "asc" | "desc"): void;
-  filterGenre: string;
-  onFilterGenreChange(v: string): void;
-  filterArtist: string;
-  onFilterArtistChange(v: string): void;
-  search: string;
-  onSearchChange(v: string): void;
   onEdit(id: string): void;
   onDelete(id: string): void;
   onUploadClick(id: string): void;
@@ -44,29 +30,17 @@ interface Props {
   onBulkDelete(ids: string[]): void;
 }
 
-export const TrackTable: React.FC<Props> = ({
+export const TrackTable: React.FC<TrackTableProps> = ({
   data,
-  genres,
-  artists,
-  genresLoading,
-  artistsLoading,
-  genresError,
-  artistsError,
+  sort,
+  order,
+  setSort,
+  setOrder,
   page,
   totalPages,
   limit,
   setPage,
   setLimit,
-  sort,
-  order,
-  setSort,
-  setOrder,
-  filterGenre,
-  onFilterGenreChange,
-  filterArtist,
-  onFilterArtistChange,
-  search,
-  onSearchChange,
   onEdit,
   onDelete,
   onUploadClick,
@@ -75,14 +49,9 @@ export const TrackTable: React.FC<Props> = ({
 }) => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
   const [sorting, setSorting] = useState<SortingState>([
     { id: sort, desc: order === "desc" },
   ]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [searchTerm, setSearchTerm] = useState(search);
-
-  useEffect(() => setSearchTerm(search), [search]);
 
   useEffect(() => {
     const first = sorting[0];
@@ -92,18 +61,21 @@ export const TrackTable: React.FC<Props> = ({
     }
   }, [sorting, setSort, setOrder]);
 
-  const toggleId = (id: string) => {
-    const next = new Set(selectedIds);
-    next.has(id) ? next.delete(id) : next.add(id);
-    setSelectedIds(next);
-  };
-  const allVisibleIds = data.map((t) => t.id);
-  const toggleAll = () =>
+  const toggleId = (id: string) =>
+    setSelectedIds((prev) =>
+      prev.has(id)
+        ? new Set([...prev].filter((x) => x !== id))
+        : new Set(prev).add(id)
+    );
+
+  const toggleAll = () => {
+    const allVisibleIds = data.map((t) => t.id);
     setSelectedIds((prev) =>
       allVisibleIds.every((id) => prev.has(id))
         ? new Set()
         : new Set(allVisibleIds)
     );
+  };
 
   const columns = useMemo(
     () =>
@@ -119,63 +91,31 @@ export const TrackTable: React.FC<Props> = ({
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters, globalFilter: searchTerm },
+    state: { sorting },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setSearchTerm,
     manualSorting: sorting[0]?.id !== "genres",
     enableSortingRemoval: false,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    globalFilterFn: "includesString",
   });
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <SelectModeToggle
-          selectionMode={selectionMode}
-          onToggleMode={() => {
-            setSelectionMode((m) => !m);
-            if (selectionMode) setSelectedIds(new Set());
-          }}
-          selectedCount={selectedIds.size}
-          onBulkDelete={() => {
-            onBulkDelete(Array.from(selectedIds));
-            setSelectedIds(new Set());
-          }}
-          bulkDeleteDisabled={selectedIds.size === 0}
-        />
-        <SearchInput
-          value={searchTerm}
-          onChange={onSearchChange}
-          placeholder="Search tracks…"
-          dataTestId="search-input"
-        />
-        <div className="flex gap-4">
-          <FilterSelect
-            label="Artists"
-            options={artists}
-            value={filterArtist}
-            loading={artistsLoading}
-            error={artistsError}
-            dataTestId="filter-artist"
-            onChange={onFilterArtistChange}
-          />
-          <FilterSelect
-            label="Genres"
-            options={genres}
-            value={filterGenre}
-            loading={genresLoading}
-            error={genresError}
-            dataTestId="filter-genre"
-            onChange={onFilterGenreChange}
-          />
-        </div>
-      </div>
+      <SelectModeToggle
+        selectionMode={selectionMode}
+        onToggleMode={() => {
+          setSelectionMode((m) => !m);
+          if (selectionMode) setSelectedIds(new Set());
+        }}
+        selectedCount={selectedIds.size}
+        onBulkDelete={() => {
+          onBulkDelete(Array.from(selectedIds));
+          setSelectedIds(new Set());
+        }}
+        bulkDeleteDisabled={selectedIds.size === 0}
+      />
 
-      <table className="table w-full table-auto">
+      <table className="table w-full table-auto mt-4">
         <thead>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
