@@ -1,4 +1,3 @@
-// client/src/components/TracksToolbar/index.tsx
 import React from "react";
 import { FilterSelect, SearchInput } from "@/components";
 
@@ -26,7 +25,7 @@ export const TrackToolbar: React.FC<TrackToolbarProps> = ({
   search,
   setSearch,
 }) => (
-  <div className="flex items-center justify-between mb-4">
+  <div className="flex items-center justify-between flex-wrap mb-4">
     <SearchInput
       value={search}
       onChange={setSearch}

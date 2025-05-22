@@ -97,7 +97,7 @@ export function AudioPlayer({ src, id, onRemove }: AudioPlayerProps) {
 
       <div
         ref={waveformRef}
-        className="flex-1 overflow-hidden cursor-pointer"
+        className="flex-1 min-w-36 overflow-hidden cursor-pointer"
         data-testid={`audio-progress-${id}`}
       />
 
