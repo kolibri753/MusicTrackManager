@@ -15,26 +15,29 @@ export const SelectModeToggle: React.FC<SelectModeToggleProps> = ({
   onBulkDelete,
   bulkDeleteDisabled,
 }) => (
-  <fieldset className="fieldset">
-    <legend className="fieldset-legend text-sm">Multi-Delete Mode</legend>
-    <div className="flex gap-2">
+  <div
+    role="toolbar"
+    aria-label="Selection mode controls"
+    className="flex items-center space-x-2 ml-auto"
+  >
+    <button
+      aria-pressed={selectionMode}
+      onClick={onToggleMode}
+      className="btn btn-primary btn-sm"
+      data-testid="select-mode-toggle"
+    >
+      {selectionMode ? "Exit Select" : "Multi Select"}
+    </button>
+
+    {selectionMode && (
       <button
-        className="btn btn-sm"
-        data-testid="select-mode-toggle"
-        onClick={onToggleMode}
+        onClick={onBulkDelete}
+        disabled={bulkDeleteDisabled}
+        className="btn btn-sm btn-error"
+        data-testid="bulk-delete-button"
       >
-        {selectionMode ? "Exit Select" : "Select"}
+        Delete {selectedCount}
       </button>
-      {selectionMode && (
-        <button
-          className="btn btn-sm btn-error"
-          data-testid="bulk-delete-button"
-          disabled={bulkDeleteDisabled}
-          onClick={onBulkDelete}
-        >
-          Delete {selectedCount}
-        </button>
-      )}
-    </div>
-  </fieldset>
+    )}
+  </div>
 );
