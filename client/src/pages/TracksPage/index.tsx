@@ -71,6 +71,19 @@ const TracksPage: React.FC = () => {
 
   const handleUpdate = async (form: TrackFormData) => {
     if (!editingTrack) return;
+
+    const fields: (keyof TrackFormData)[] = [
+      "title",
+      "artist",
+      "genres",
+      "album",
+      "coverImage",
+    ];
+    if (fields.every((k) => editingTrack[k] === form[k])) {
+      setEditingTrack(null);
+      return;
+    }
+
     try {
       await trackService.update(editingTrack.id, form);
       showToastMessage("success", "Track updated successfully");
