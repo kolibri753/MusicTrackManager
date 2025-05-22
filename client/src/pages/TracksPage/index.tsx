@@ -6,6 +6,7 @@ import {
   TrackForm,
   TrackTable,
   UploadFileModal,
+  TrackToolbar,
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
 import { trackService } from "@/api";
@@ -136,6 +137,18 @@ const TracksPage: React.FC = () => {
     }
   };
 
+  const openEdit = (id: string) =>
+    setEditingTrack(data.find((t) => t.id === id) ?? null);
+
+  const openDelete = (id: string) =>
+    setDeletingTrack(data.find((t) => t.id === id) ?? null);
+
+  const openUpload = (id: string) =>
+    setUploadingTrack(data.find((t) => t.id === id) ?? null);
+
+  const openDeleteFile = (id: string) =>
+    setDeletingFile(data.find((t) => t.id === id) ?? null);
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-6">
@@ -150,41 +163,40 @@ const TracksPage: React.FC = () => {
           </button>
         </div>
 
+        <TrackToolbar
+          artists={{
+            list: artistList,
+            loading: artistsLoading,
+            error: !!artistsError,
+          }}
+          genres={{
+            list: genreList,
+            loading: genresLoading,
+            error: !!genresError,
+          }}
+          filterArtist={filterArtist}
+          setFilterArtist={setFilterArtist}
+          filterGenre={filterGenre}
+          setFilterGenre={setFilterGenre}
+          search={search}
+          setSearch={setSearch}
+        />
+
         <TrackTable
           data={data}
-          genres={genreList}
-          artists={artistList}
-          genresLoading={genresLoading}
-          genresError={!!genresError}
-          artistsLoading={artistsLoading}
-          artistsError={!!artistsError}
+          sort={sort}
+          order={order}
+          setSort={setSort}
+          setOrder={setOrder}
           page={page}
           totalPages={totalPages}
           limit={limit}
           setPage={setPage}
           setLimit={setLimit}
-          sort={sort}
-          order={order}
-          setSort={setSort}
-          setOrder={setOrder}
-          filterGenre={filterGenre}
-          onFilterGenreChange={setFilterGenre}
-          filterArtist={filterArtist}
-          onFilterArtistChange={setFilterArtist}
-          search={search}
-          onSearchChange={setSearch}
-          onEdit={(id) =>
-            setEditingTrack(data.find((t) => t.id === id) ?? null)
-          }
-          onDelete={(id) =>
-            setDeletingTrack(data.find((t) => t.id === id) ?? null)
-          }
-          onUploadClick={(id) =>
-            setUploadingTrack(data.find((t) => t.id === id) ?? null)
-          }
-          onDeleteFile={(id) =>
-            setDeletingFile(data.find((t) => t.id === id) ?? null)
-          }
+          onEdit={openEdit}
+          onDelete={openDelete}
+          onUploadClick={openUpload}
+          onDeleteFile={openDeleteFile}
           onBulkDelete={setBulkDeleteIds}
         />
 
