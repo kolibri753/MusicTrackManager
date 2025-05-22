@@ -30,7 +30,7 @@ const TracksPage: React.FC = () => {
     setArtist: setFilterArtist,
     search,
     setSearch,
-    refetch,
+    refetch: refetchTracks,
   } = useTracks();
 
   useEffect(() => {
@@ -47,6 +47,7 @@ const TracksPage: React.FC = () => {
     artists: artistList,
     loading: artistsLoading,
     error: artistsError,
+    refetch: refetchArtists,
   } = useArtists();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -60,7 +61,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.create(form);
       showToastMessage("success", "Track created successfully");
-      await refetch();
+      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -73,7 +74,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.update(editingTrack.id, form);
       showToastMessage("success", "Track updated successfully");
-      await refetch();
+      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -86,7 +87,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.delete(deletingTrack.id);
       showToastMessage("success", "Track deleted successfully");
-      await refetch();
+      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -99,7 +100,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.uploadTrackFile(uploadingTrack.id, file);
       showToastMessage("success", "File uploaded");
-      await refetch();
+      await refetchTracks();
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -112,7 +113,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.deleteTrackFile(deletingFileTrack.id);
       showToastMessage("success", "File removed");
-      await refetch();
+      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -129,7 +130,7 @@ const TracksPage: React.FC = () => {
       );
       if (failed.length)
         showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
-      await refetch();
+      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
