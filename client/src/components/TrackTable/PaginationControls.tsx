@@ -16,7 +16,7 @@ export const PaginationControls: React.FC<Props> = ({
   setLimit,
 }) => (
   <div
-    className="flex items-center justify-end gap-4 mt-4"
+    className="flex items-center justify-end flex-wrap gap-4 mt-4"
     data-testid="pagination"
   >
     <button

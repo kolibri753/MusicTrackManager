@@ -115,42 +115,47 @@ export const TrackTable: React.FC<TrackTableProps> = ({
         bulkDeleteDisabled={selectedIds.size === 0}
       />
 
-      <table className="table w-full table-auto mt-4">
-        <thead>
-          {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id}>
-              {hg.headers.map((header) => (
-                <th
-                  key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
-                  className="cursor-pointer select-none"
-                  style={{ width: header.column.columnDef.size }}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                  {{
-                    asc: <ChevronUp className="inline w-4 h-4 ml-1" />,
-                    desc: <ChevronDown className="inline w-4 h-4 ml-1" />,
-                  }[header.column.getIsSorted() as string] ?? null}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} style={{ width: cell.column.columnDef.size }}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="overflow-x-auto">
+        <table className="table w-full table-auto mt-4">
+          <thead>
+            {table.getHeaderGroups().map((hg) => (
+              <tr key={hg.id}>
+                {hg.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                    className="cursor-pointer select-none"
+                    style={{ width: header.column.columnDef.size }}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                    {{
+                      asc: <ChevronUp className="inline w-4 h-4 ml-1" />,
+                      desc: <ChevronDown className="inline w-4 h-4 ml-1" />,
+                    }[header.column.getIsSorted() as string] ?? null}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    style={{ width: cell.column.columnDef.size }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <PaginationControls
         page={page}
