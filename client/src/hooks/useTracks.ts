@@ -3,7 +3,7 @@ import { trackService } from "@/api";
 import type { Track, Meta } from "@/types";
 
 /**
- * Fetch and control paged track data
+ * Fetch and control paged track data with local mutators
  */
 export function useTracks(initialLimit = 10) {
   const [data, setData] = useState<Track[]>([]);
@@ -50,11 +50,34 @@ export function useTracks(initialLimit = 10) {
     return () => ctrl.abort();
   }, [fetchData]);
 
+  const addTrack = (track: Track) => {
+    setData((prev) => [track, ...prev]);
+    setMeta((prev) => ({ ...prev, total: prev.total + 1 }));
+  };
+
+  const updateTrack = (track: Track) =>
+    setData((prev) => prev.map((t) => (t.id === track.id ? track : t)));
+
+  const removeTrack = (id: string) => {
+    setData((prev) => prev.filter((t) => t.id !== id));
+    setMeta((prev) => ({ ...prev, total: Math.max(prev.total - 1, 0) }));
+  };
+
+  const removeMany = (ids: string[]) => {
+    setData((prev) => prev.filter((t) => !ids.includes(t.id)));
+    setMeta((prev) => ({
+      ...prev,
+      total: Math.max(prev.total - ids.length, 0),
+    }));
+  };
+
   return {
+    /* data */
     data,
     meta,
     loading,
     error,
+    /* query params */
     page,
     limit,
     sort,
@@ -62,6 +85,7 @@ export function useTracks(initialLimit = 10) {
     genre,
     artist,
     search,
+    /* setters */
     setPage,
     setLimit,
     setSort,
@@ -69,6 +93,11 @@ export function useTracks(initialLimit = 10) {
     setGenre,
     setArtist,
     setSearch,
+    /* actions */
     refetch: () => fetchData(),
+    addTrack,
+    updateTrack,
+    removeTrack,
+    removeMany,
   };
 }
