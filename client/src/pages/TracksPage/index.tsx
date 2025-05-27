@@ -10,7 +10,7 @@ import {
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
 import { trackService } from "@/api";
-import { extractErrorMessage, showToastMessage } from "@/helpers";
+import { extractErrorMessage, showToastMessage, toTitleCase } from "@/helpers";
 
 const TracksPage: React.FC = () => {
   const {
@@ -30,6 +30,10 @@ const TracksPage: React.FC = () => {
     setArtist: setFilterArtist,
     search,
     setSearch,
+    addTrack,
+    updateTrack,
+    removeTrack,
+    removeMany,
     refetch: refetchTracks,
   } = useTracks();
   const memoData = useMemo(() => data, [data]);
@@ -49,6 +53,7 @@ const TracksPage: React.FC = () => {
     loading: artistsLoading,
     error: artistsError,
     refetch: refetchArtists,
+    addArtist,
   } = useArtists();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -60,9 +65,13 @@ const TracksPage: React.FC = () => {
 
   const handleCreate = async (form: TrackFormData) => {
     try {
-      await trackService.create(form);
+      const created = await trackService.create({
+        ...form,
+        artist: toTitleCase(form.artist),
+      });
+      addTrack(created);
+      addArtist(created.artist);
       showToastMessage("success", "Track created successfully");
-      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -73,22 +82,36 @@ const TracksPage: React.FC = () => {
   const handleUpdate = async (form: TrackFormData) => {
     if (!editingTrack) return;
 
-    const fields: (keyof TrackFormData)[] = [
+    const unchanged = [
       "title",
       "artist",
       "genres",
       "album",
       "coverImage",
-    ];
-    if (fields.every((k) => editingTrack[k] === form[k])) {
+    ].every(
+      (k) =>
+        editingTrack[k as keyof TrackFormData] ===
+        form[k as keyof TrackFormData]
+    );
+    if (unchanged) {
       setEditingTrack(null);
       return;
     }
 
     try {
-      await trackService.update(editingTrack.id, form);
+      const updated = await trackService.update(editingTrack.id, {
+        ...form,
+        artist: toTitleCase(form.artist),
+      });
+      const artistChanged = editingTrack.artist !== updated.artist;
+      const filterHits =
+        !filterArtist ||
+        filterArtist === editingTrack.artist ||
+        filterArtist === updated.artist;
+
+      if (artistChanged) await refetchArtists();
+      if (artistChanged && filterHits) await refetchTracks();
       showToastMessage("success", "Track updated successfully");
-      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -100,8 +123,9 @@ const TracksPage: React.FC = () => {
     if (!deletingTrack) return;
     try {
       await trackService.delete(deletingTrack.id);
+      removeTrack(deletingTrack.id);
+      await refetchArtists();
       showToastMessage("success", "Track deleted successfully");
-      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -112,9 +136,12 @@ const TracksPage: React.FC = () => {
   const confirmUpload = async (file: File) => {
     if (!uploadingTrack) return;
     try {
-      await trackService.uploadTrackFile(uploadingTrack.id, file);
+      const updated = await trackService.uploadTrackFile(
+        uploadingTrack.id,
+        file
+      );
+      updateTrack(updated);
       showToastMessage("success", "File uploaded");
-      await refetchTracks();
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -125,9 +152,9 @@ const TracksPage: React.FC = () => {
   const confirmDeleteFile = async () => {
     if (!deletingFileTrack) return;
     try {
-      await trackService.deleteTrackFile(deletingFileTrack.id);
+      const updated = await trackService.deleteTrackFile(deletingFileTrack.id);
+      updateTrack(updated);
       showToastMessage("success", "File removed");
-      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -138,13 +165,14 @@ const TracksPage: React.FC = () => {
   const handleBulkDelete = async (ids: string[]) => {
     try {
       const { success, failed } = await trackService.deleteMultipleTracks(ids);
+      removeMany(success);
+      await refetchArtists();
       showToastMessage(
         "success",
         `Deleted ${success.length} track${success.length === 1 ? "" : "s"}`
       );
       if (failed.length)
         showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
-      await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {

@@ -147,8 +147,8 @@ export const getTracks = async (
 
     if (params.artist) {
       const artistLower = params.artist.toLowerCase();
-      tracks = tracks.filter((track) =>
-        track.artist.toLowerCase().includes(artistLower)
+      tracks = tracks.filter(
+        (track) => track.artist.toLowerCase() === artistLower
       );
     }
 
