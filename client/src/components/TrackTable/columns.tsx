@@ -12,10 +12,10 @@ export interface SelectionOptions {
 }
 
 export const getColumns = (
-  onEdit: (id: string) => void,
-  onDelete: (id: string) => void,
-  onUploadClick: (id: string) => void,
-  onDeleteFile: (id: string) => void,
+  onEdit: (track: Track) => void,
+  onDelete: (track: Track) => void,
+  onUploadClick: (track: Track) => void,
+  onDeleteFile: (track: Track) => void,
   selectionOptions?: SelectionOptions
 ): ColumnDef<Track>[] => {
   const base: ColumnDef<Track>[] = [
@@ -87,18 +87,19 @@ export const getColumns = (
       enableSorting: false,
       size: 300,
       cell: ({ row }) => {
-        const { id, audioFile } = row.original;
-        return audioFile ? (
+        const track = row.original;
+
+        return track.audioFile ? (
           <AudioPlayer
-            src={`/api/files/${audioFile}`}
-            id={id}
-            onRemove={() => onDeleteFile(id)}
+            src={`/api/files/${track.audioFile}`}
+            id={track.id}
+            onRemove={() => onDeleteFile(track)}
           />
         ) : (
           <button
             className="btn btn-xs"
-            onClick={() => onUploadClick(id)}
-            data-testid={`upload-track-${id}`}
+            onClick={() => onUploadClick(track)}
+            data-testid={`upload-track-${track.id}`}
           >
             Upload
           </button>
@@ -111,20 +112,21 @@ export const getColumns = (
       header: "Actions",
       size: 50,
       cell: ({ row }) => {
-        const id = row.original.id;
+        const track = row.original;
+
         return (
           <div className="flex gap-2">
             <button
               className="btn btn-xs btn-ghost"
-              onClick={() => onEdit(id)}
-              data-testid={`edit-track-${id}`}
+              onClick={() => onEdit(track)}
+              data-testid={`edit-track-${track.id}`}
             >
               <Edit2 size={14} />
             </button>
             <button
               className="btn btn-xs btn-error btn-outline"
-              onClick={() => onDelete(id)}
-              data-testid={`delete-track-${id}`}
+              onClick={() => onDelete(track)}
+              data-testid={`delete-track-${track.id}`}
             >
               <Trash2 size={14} />
             </button>

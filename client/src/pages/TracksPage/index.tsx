@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTracks, useArtists, useGenres } from "@/hooks";
 import {
   DeleteConfirmationModal,
@@ -152,31 +152,6 @@ const TracksPage: React.FC = () => {
     }
   };
 
-  const openEdit = useCallback(
-    (id: string) => setEditingTrack(data.find((t) => t.id === id) ?? null),
-    [data]
-  );
-
-  const openDelete = useCallback(
-    (id: string) => setDeletingTrack(data.find((t) => t.id === id) ?? null),
-    [data]
-  );
-
-  const openUpload = useCallback(
-    (id: string) => setUploadingTrack(data.find((t) => t.id === id) ?? null),
-    [data]
-  );
-
-  const openDeleteFile = useCallback(
-    (id: string) => setDeletingFile(data.find((t) => t.id === id) ?? null),
-    [data]
-  );
-
-  const triggerBulkDelete = useCallback(
-    (ids: string[]) => setBulkDeleteIds(ids),
-    []
-  );
-
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-6">
@@ -221,11 +196,11 @@ const TracksPage: React.FC = () => {
           limit={limit}
           setPage={setPage}
           setLimit={setLimit}
-          onEdit={openEdit}
-          onDelete={openDelete}
-          onUploadClick={openUpload}
-          onDeleteFile={openDeleteFile}
-          onBulkDelete={triggerBulkDelete}
+          onEdit={setEditingTrack}
+          onDelete={setDeletingTrack}
+          onUploadClick={setUploadingTrack}
+          onDeleteFile={setDeletingFile}
+          onBulkDelete={setBulkDeleteIds}
         />
 
         {isCreating && (
