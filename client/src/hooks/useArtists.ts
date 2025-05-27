@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { artistService } from "@/api";
+import { toTitleCase } from "@/helpers";
 
 /**
  * Get the list of artist names
@@ -13,7 +14,7 @@ export function useArtists() {
     try {
       setLoading(true);
       const data = await artistService.list({ signal });
-      setArtists(data);
+      setArtists(Array.from(new Set(data.map(toTitleCase))).sort());
       setError(null);
     } catch (err: unknown) {
       if ((err as Error).name !== "AbortError") setError(err as Error);
