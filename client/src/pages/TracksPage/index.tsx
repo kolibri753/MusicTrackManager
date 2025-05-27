@@ -10,7 +10,7 @@ import {
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
 import { trackService } from "@/api";
-import { extractErrorMessage, showToastMessage } from "@/helpers";
+import { extractErrorMessage, showToastMessage, toTitleCase } from "@/helpers";
 
 const TracksPage: React.FC = () => {
   const {
@@ -60,7 +60,10 @@ const TracksPage: React.FC = () => {
 
   const handleCreate = async (form: TrackFormData) => {
     try {
-      await trackService.create(form);
+      await trackService.create({
+        ...form,
+        artist: toTitleCase(form.artist),
+      });
       showToastMessage("success", "Track created successfully");
       await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
@@ -73,20 +76,23 @@ const TracksPage: React.FC = () => {
   const handleUpdate = async (form: TrackFormData) => {
     if (!editingTrack) return;
 
-    const fields: (keyof TrackFormData)[] = [
-      "title",
-      "artist",
-      "genres",
-      "album",
-      "coverImage",
-    ];
-    if (fields.every((k) => editingTrack[k] === form[k])) {
+    const noChange =
+      editingTrack.title === form.title &&
+      editingTrack.artist.toLowerCase() === form.artist.toLowerCase() &&
+      JSON.stringify(editingTrack.genres) === JSON.stringify(form.genres) &&
+      editingTrack.album === form.album &&
+      editingTrack.coverImage === form.coverImage;
+
+    if (noChange) {
       setEditingTrack(null);
       return;
     }
 
     try {
-      await trackService.update(editingTrack.id, form);
+      await trackService.update(editingTrack.id, {
+        ...form,
+        artist: toTitleCase(form.artist),
+      });
       showToastMessage("success", "Track updated successfully");
       await Promise.all([refetchTracks(), refetchArtists()]);
     } catch (e) {
