@@ -10,7 +10,7 @@ import {
 } from "@/components";
 import type { Track, TrackFormData } from "@/types";
 import { trackService } from "@/api";
-import { extractErrorMessage, showToastMessage } from "@/helpers";
+import { extractErrorMessage, showToastMessage, toTitleCase } from "@/helpers";
 
 const TracksPage: React.FC = () => {
   const {
@@ -34,6 +34,7 @@ const TracksPage: React.FC = () => {
     updateTrack,
     removeTrack,
     removeMany,
+    refetch: refetchTracks,
   } = useTracks();
   const memoData = useMemo(() => data, [data]);
 
@@ -64,7 +65,10 @@ const TracksPage: React.FC = () => {
 
   const handleCreate = async (form: TrackFormData) => {
     try {
-      const created = await trackService.create(form);
+      const created = await trackService.create({
+        ...form,
+        artist: toTitleCase(form.artist),
+      });
       addTrack(created);
       addArtist(created.artist);
       showToastMessage("success", "Track created successfully");
@@ -95,9 +99,18 @@ const TracksPage: React.FC = () => {
     }
 
     try {
-      const updated = await trackService.update(editingTrack.id, form);
-      updateTrack(updated);
-      if (editingTrack.artist !== updated.artist) await refetchArtists();
+      const updated = await trackService.update(editingTrack.id, {
+        ...form,
+        artist: toTitleCase(form.artist),
+      });
+      const artistChanged = editingTrack.artist !== updated.artist;
+      const filterHits =
+        !filterArtist ||
+        filterArtist === editingTrack.artist ||
+        filterArtist === updated.artist;
+
+      if (artistChanged) await refetchArtists();
+      if (artistChanged && filterHits) await refetchTracks();
       showToastMessage("success", "Track updated successfully");
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
