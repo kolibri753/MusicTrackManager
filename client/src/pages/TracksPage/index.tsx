@@ -52,6 +52,7 @@ const TracksPage: React.FC = () => {
     loading: artistsLoading,
     error: artistsError,
     refetch: refetchArtists,
+    addArtist,
   } = useArtists();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -65,7 +66,7 @@ const TracksPage: React.FC = () => {
     try {
       const created = await trackService.create(form);
       addTrack(created);
-      if (!artistList.includes(created.artist)) await refetchArtists();
+      addArtist(created.artist);
       showToastMessage("success", "Track created successfully");
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
@@ -96,12 +97,7 @@ const TracksPage: React.FC = () => {
     try {
       const updated = await trackService.update(editingTrack.id, form);
       updateTrack(updated);
-      if (
-        editingTrack.artist !== updated.artist &&
-        !artistList.includes(updated.artist)
-      ) {
-        await refetchArtists();
-      }
+      if (editingTrack.artist !== updated.artist) await refetchArtists();
       showToastMessage("success", "Track updated successfully");
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
@@ -115,8 +111,8 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.delete(deletingTrack.id);
       removeTrack(deletingTrack.id);
-      showToastMessage("success", "Track deleted successfully");
       await refetchArtists();
+      showToastMessage("success", "Track deleted successfully");
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -157,24 +153,19 @@ const TracksPage: React.FC = () => {
     try {
       const { success, failed } = await trackService.deleteMultipleTracks(ids);
       removeMany(success);
+      await refetchArtists();
       showToastMessage(
         "success",
         `Deleted ${success.length} track${success.length === 1 ? "" : "s"}`
       );
       if (failed.length)
         showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
-      await refetchArtists();
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
       setBulkDeleteIds([]);
     }
   };
-
-  // const triggerBulkDelete = useCallback(
-  //   (ids: string[]) => setBulkDeleteIds(ids),
-  //   []
-  // );
 
   return (
     <div className="min-h-screen">

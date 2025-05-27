@@ -28,7 +28,16 @@ export function useArtists() {
     return () => ctrl.abort();
   }, [load]);
 
+  const addArtist = (name: string) =>
+    setArtists((prev) => (prev.includes(name) ? prev : [...prev, name]));
+
   const refetch = () => load();
 
-  return { artists, loading, error, refetch };
+  return {
+    artists,
+    loading,
+    error,
+    refetch,
+    addArtist,
+  };
 }
