@@ -23,10 +23,10 @@ export interface TrackTableProps {
   limit: number;
   setPage(p: number): void;
   setLimit(l: number): void;
-  onEdit(id: string): void;
-  onDelete(id: string): void;
-  onUploadClick(id: string): void;
-  onDeleteFile(id: string): void;
+  onEdit(track: Track): void;
+  onDelete(track: Track): void;
+  onUploadClick(track: Track): void;
+  onDeleteFile(track: Track): void;
   onBulkDelete(ids: string[]): void;
 }
 
@@ -91,6 +91,7 @@ export const TrackTable: React.FC<TrackTableProps> = ({
   const table = useReactTable({
     data,
     columns,
+    getRowId: (row) => row.id,
     state: { sorting },
     onSortingChange: setSorting,
     manualSorting: sorting[0]?.id !== "genres",
