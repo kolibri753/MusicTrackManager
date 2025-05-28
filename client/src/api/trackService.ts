@@ -1,6 +1,7 @@
 import { BaseService } from "./baseService";
 import { IHttpClient } from "./httpClient";
-import { Track, TrackFormData, Paginated } from "@/types";
+import type { Track, Paginated } from "@/types";
+import type { TrackFormData } from "@/schemas";
 
 export interface FetchTracksOptions {
   page?: number;

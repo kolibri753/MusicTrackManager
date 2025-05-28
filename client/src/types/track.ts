@@ -10,8 +10,6 @@ export interface Track {
   audioFile?: string;
 }
 
-export type TrackFormData = Omit<Track, "id" | "slug" | "createdAt">;
-
 export interface Meta {
   total: number;
   page: number;

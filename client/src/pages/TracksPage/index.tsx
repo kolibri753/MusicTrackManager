@@ -8,7 +8,8 @@ import {
   UploadFileModal,
   TrackToolbar,
 } from "@/components";
-import type { Track, TrackFormData } from "@/types";
+import type { Track } from "@/types";
+import type { TrackFormData } from "@/schemas";
 import { trackService } from "@/api";
 import { extractErrorMessage, showToastMessage } from "@/helpers";
 
@@ -38,18 +39,8 @@ const TracksPage: React.FC = () => {
     if (page > totalPages) setPage(totalPages || 1);
   }, [page, totalPages, setPage]);
 
-  const {
-    genres: genreList,
-    loading: genresLoading,
-    error: genresError,
-  } = useGenres();
-
-  const {
-    artists: artistList,
-    loading: artistsLoading,
-    error: artistsError,
-    refetch: refetchArtists,
-  } = useArtists();
+  const genres = useGenres();
+  const artists = useArtists();
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
@@ -62,7 +53,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.create(form);
       showToastMessage("success", "Track created successfully");
-      await Promise.all([refetchTracks(), refetchArtists()]);
+      await Promise.all([refetchTracks(), artists.refetch()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -88,7 +79,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.update(editingTrack.id, form);
       showToastMessage("success", "Track updated successfully");
-      await Promise.all([refetchTracks(), refetchArtists()]);
+      await Promise.all([refetchTracks(), artists.refetch()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -101,7 +92,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.delete(deletingTrack.id);
       showToastMessage("success", "Track deleted successfully");
-      await Promise.all([refetchTracks(), refetchArtists()]);
+      await Promise.all([refetchTracks(), artists.refetch()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -127,7 +118,7 @@ const TracksPage: React.FC = () => {
     try {
       await trackService.deleteTrackFile(deletingFileTrack.id);
       showToastMessage("success", "File removed");
-      await Promise.all([refetchTracks(), refetchArtists()]);
+      await Promise.all([refetchTracks(), artists.refetch()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -144,7 +135,7 @@ const TracksPage: React.FC = () => {
       );
       if (failed.length)
         showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
-      await Promise.all([refetchTracks(), refetchArtists()]);
+      await Promise.all([refetchTracks(), artists.refetch()]);
     } catch (e) {
       showToastMessage("error", extractErrorMessage(e));
     } finally {
@@ -167,16 +158,8 @@ const TracksPage: React.FC = () => {
         </div>
 
         <TrackToolbar
-          artists={{
-            list: artistList,
-            loading: artistsLoading,
-            error: !!artistsError,
-          }}
-          genres={{
-            list: genreList,
-            loading: genresLoading,
-            error: !!genresError,
-          }}
+          artists={artists}
+          genres={genres}
           filterArtist={filterArtist}
           setFilterArtist={setFilterArtist}
           filterGenre={filterGenre}
@@ -207,6 +190,7 @@ const TracksPage: React.FC = () => {
           <Modal onClose={() => setIsCreating(false)}>
             <TrackForm
               onSubmit={handleCreate}
+              genres={genres}
               onCancel={() => setIsCreating(false)}
             />
           </Modal>
@@ -216,6 +200,7 @@ const TracksPage: React.FC = () => {
           <Modal onClose={() => setEditingTrack(null)}>
             <TrackForm
               initialData={editingTrack}
+              genres={genres}
               onSubmit={handleUpdate}
               onCancel={() => setEditingTrack(null)}
             />
