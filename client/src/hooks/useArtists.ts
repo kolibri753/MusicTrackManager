@@ -1,22 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
 import { artistService } from "@/api";
+import type { RefreshableResourceState } from "@/types/resource";
 
 /**
  * Get the list of artist names
  */
-export function useArtists() {
-  const [artists, setArtists] = useState<string[]>([]);
+export function useArtists(): RefreshableResourceState<string> {
+  const [list, setList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState(false);
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
+      setError(false);
       const data = await artistService.list({ signal });
-      setArtists(data);
-      setError(null);
-    } catch (err: unknown) {
-      if ((err as Error).name !== "AbortError") setError(err as Error);
+      setList(data);
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        console.error(err);
+        setError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -27,8 +31,8 @@ export function useArtists() {
     load(ctrl.signal);
     return () => ctrl.abort();
   }, [load]);
-
+  
   const refetch = () => load();
 
-  return { artists, loading, error, refetch };
+  return { list, loading, error, refetch };
 }

@@ -6,13 +6,14 @@ import {
 } from "react-hook-form";
 import { TagSelector } from "@/components";
 import type { TrackFormData } from "@/schemas";
+import type { ResourceState } from "@/types";
 
 interface Props {
   register: UseFormRegister<TrackFormData>;
   control: Control<TrackFormData>;
   errors: FieldErrors<TrackFormData>;
   disabled: boolean;
-  genres: { list: string[]; loading: boolean; error: boolean };
+  genres: ResourceState<string>;
 }
 
 export function TrackFormFields({

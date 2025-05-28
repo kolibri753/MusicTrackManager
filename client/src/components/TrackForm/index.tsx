@@ -1,40 +1,26 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { trackFormSchema } from "@/schemas";
-import type { TrackFormData } from "@/schemas";
 import { TrackFormFields } from "./fields";
+import { useTrackForm } from "@/hooks";
+import type { TrackFormData } from "@/schemas";
+import type { ResourceState } from "@/types";
 
 interface Props {
   initialData?: TrackFormData;
-  genres: { list: string[]; loading: boolean; error: boolean };
+  genres: ResourceState<string>;
   onSubmit(data: TrackFormData): Promise<void>;
   onCancel(): void;
 }
 
 export function TrackForm({ initialData, genres, onSubmit, onCancel }: Props) {
-  const initialValues: TrackFormData = initialData ?? {
-    title: "",
-    artist: "",
-    album: "",
-    genres: [],
-    coverImage: "",
-  };
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<TrackFormData>({
-    resolver: zodResolver(trackFormSchema),
-    defaultValues: initialValues,
+  const { register, control, errors, isSubmitting, submit } = useTrackForm({
+    initial: initialData,
+    onSubmit,
   });
 
   return (
     <form
       data-testid="track-form"
-      data-loading={isSubmitting ? "true" : undefined}
-      onSubmit={handleSubmit(onSubmit)}
+      data-loading={isSubmitting || undefined}
+      onSubmit={submit}
       className="space-y-4"
     >
       <TrackFormFields

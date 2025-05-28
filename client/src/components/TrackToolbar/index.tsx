@@ -1,9 +1,10 @@
 import React from "react";
 import { FilterSelect, SearchInput } from "@/components";
+import type { ResourceState } from "@/types";
 
 export interface TrackToolbarProps {
-  artists: { list: string[]; loading: boolean; error: boolean };
-  genres: { list: string[]; loading: boolean; error: boolean };
+  artists: ResourceState<string>;
+  genres: ResourceState<string>;
 
   filterArtist: string;
   setFilterArtist(v: string): void;
