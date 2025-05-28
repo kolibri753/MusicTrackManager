@@ -1,22 +1,16 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trackFormSchema, TrackFormData } from "@/schemas/track";
-import { useGenres } from "@/hooks";
 import { TrackFormFields } from "./fields";
 
 interface Props {
   initialData?: TrackFormData;
+  genres: { list: string[]; loading: boolean; error: boolean };
   onSubmit(data: TrackFormData): Promise<void>;
   onCancel(): void;
 }
 
-export function TrackForm({
-  initialData,
-  onSubmit,
-  onCancel,
-}: Props) {
-  const g = useGenres();
-
+export function TrackForm({ initialData, genres, onSubmit, onCancel }: Props) {
   const initialValues: TrackFormData = initialData ?? {
     title: "",
     artist: "",
@@ -47,11 +41,7 @@ export function TrackForm({
         control={control}
         errors={errors}
         disabled={isSubmitting}
-        genres={{
-          list: g.genres,
-          loading: g.loading,
-          error: !!g.error,
-        }}
+        genres={genres}
       />
 
       <div className="flex justify-end gap-2">

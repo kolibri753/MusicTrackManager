@@ -207,6 +207,11 @@ const TracksPage: React.FC = () => {
           <Modal onClose={() => setIsCreating(false)}>
             <TrackForm
               onSubmit={handleCreate}
+              genres={{
+                list: genreList,
+                loading: genresLoading,
+                error: !!genresError,
+              }}
               onCancel={() => setIsCreating(false)}
             />
           </Modal>
@@ -216,6 +221,11 @@ const TracksPage: React.FC = () => {
           <Modal onClose={() => setEditingTrack(null)}>
             <TrackForm
               initialData={editingTrack}
+              genres={{
+                list: genreList,
+                loading: genresLoading,
+                error: !!genresError,
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingTrack(null)}
             />
