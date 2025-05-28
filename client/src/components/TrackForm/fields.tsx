@@ -4,8 +4,8 @@ import {
   Control,
   FieldErrors,
 } from "react-hook-form";
-import { TagSelector } from "@/components/common/TagSelector";
-import { TrackFormData } from "@/schemas/track";
+import { TagSelector } from "@/components";
+import type { TrackFormData } from "@/schemas";
 
 interface Props {
   register: UseFormRegister<TrackFormData>;

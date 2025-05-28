@@ -8,7 +8,8 @@ import {
   UploadFileModal,
   TrackToolbar,
 } from "@/components";
-import type { Track, TrackFormData } from "@/types";
+import type { Track } from "@/types";
+import type { TrackFormData } from "@/schemas";
 import { trackService } from "@/api";
 import { extractErrorMessage, showToastMessage } from "@/helpers";
 

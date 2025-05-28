@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { trackFormSchema, TrackFormData } from "@/schemas/track";
+import { trackFormSchema } from "@/schemas";
+import type { TrackFormData } from "@/schemas";
 import { TrackFormFields } from "./fields";
 
 interface Props {

@@ -1,5 +1,3 @@
-import type { TrackFormData } from "@/schemas/track";
-
 export interface Track {
   id: string;
   slug: string;
@@ -11,8 +9,6 @@ export interface Track {
   createdAt: string;
   audioFile?: string;
 }
-
-export type { TrackFormData };
 
 export interface Meta {
   total: number;
