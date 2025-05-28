@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.8.4",
@@ -17,10 +18,12 @@
     "lucide-react": "^0.493.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.4",
     "react-router-dom": "^7.5.1",
     "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.4",
-    "wavesurfer.js": "^7.9.4"
+    "wavesurfer.js": "^7.9.4",
+    "zod": "^3.25.30"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
