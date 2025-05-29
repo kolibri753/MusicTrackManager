@@ -80,8 +80,8 @@ const TracksPage: React.FC = () => {
       await trackService.update(editingTrack.id, form);
       showToastMessage("success", "Track updated successfully");
       await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (e) {
-      showToastMessage("error", extractErrorMessage(e));
+    } catch (err: unknown) {
+      showToastMessage("error", extractErrorMessage(err));
     } finally {
       setEditingTrack(null);
     }
@@ -93,8 +93,8 @@ const TracksPage: React.FC = () => {
       await trackService.delete(deletingTrack.id);
       showToastMessage("success", "Track deleted successfully");
       await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (e) {
-      showToastMessage("error", extractErrorMessage(e));
+    } catch (err: unknown) {
+      showToastMessage("error", extractErrorMessage(err));
     } finally {
       setDeletingTrack(null);
     }
@@ -106,11 +106,10 @@ const TracksPage: React.FC = () => {
       await trackService.uploadTrackFile(uploadingTrack.id, file);
       showToastMessage("success", "File uploaded");
       await refetchTracks();
-    } catch (e) {
-      showToastMessage("error", extractErrorMessage(e));
-    } finally {
-      setUploadingTrack(null);
+    } catch (err: unknown) {
+      showToastMessage("error", extractErrorMessage(err));
     }
+    setUploadingTrack(null);
   };
 
   const confirmDeleteFile = async () => {
@@ -119,8 +118,8 @@ const TracksPage: React.FC = () => {
       await trackService.deleteTrackFile(deletingFileTrack.id);
       showToastMessage("success", "File removed");
       await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (e) {
-      showToastMessage("error", extractErrorMessage(e));
+    } catch (err: unknown) {
+      showToastMessage("error", extractErrorMessage(err));
     } finally {
       setDeletingFile(null);
     }
@@ -136,8 +135,8 @@ const TracksPage: React.FC = () => {
       if (failed.length)
         showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
       await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (e) {
-      showToastMessage("error", extractErrorMessage(e));
+    } catch (err: unknown) {
+      showToastMessage("error", extractErrorMessage(err));
     } finally {
       setBulkDeleteIds([]);
     }
