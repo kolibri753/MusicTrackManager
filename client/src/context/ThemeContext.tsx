@@ -1,15 +1,15 @@
 import {
   createContext,
-  useContext,
   useState,
   useLayoutEffect,
-  ReactNode,
+  type ReactNode,
 } from "react";
 
 type Theme = "light" | "dark";
+
 interface ThemeContextType {
   theme: Theme;
-  toggle: () => void;
+  toggle(): void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -39,10 +39,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useTheme() {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme must be inside ThemeProvider");
-  }
-  return ctx;
-}
+export { ThemeContext };
