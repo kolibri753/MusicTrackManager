@@ -1,7 +1,7 @@
-import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { trackFormSchema, TrackFormData } from "@/schemas/track";
+import type { TrackFormData } from "@/schemas";
+import { trackFormSchema } from "@/schemas";
 import { extractErrorMessage, showToastMessage } from "@/helpers";
 
 export interface UseTrackFormArgs {
@@ -26,16 +26,13 @@ export function useTrackForm({ initial, onSubmit }: UseTrackFormArgs) {
     },
   });
 
-  const submit = useCallback(
-    handleSubmit(async (data) => {
-      try {
-        await onSubmit(data);
-      } catch (err) {
-        showToastMessage("error", extractErrorMessage(err));
-      }
-    }),
-    [handleSubmit, onSubmit]
-  );
+  const submit = handleSubmit(async (data) => {
+    try {
+      await onSubmit(data);
+    } catch (err: unknown) {
+      showToastMessage("error", extractErrorMessage(err));
+    }
+  });
 
   return { register, control, errors, isSubmitting, submit };
 }

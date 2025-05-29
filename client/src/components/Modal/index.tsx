@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { HTMLAttributes, ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { X } from "lucide-react";
 
 interface ModalProps extends HTMLAttributes<HTMLDivElement> {

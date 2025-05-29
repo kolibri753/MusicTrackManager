@@ -4,12 +4,12 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
-  SortingState,
+  type SortingState,
 } from "@tanstack/react-table";
-import { Track } from "@/types";
+import type { Track } from "@/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { SelectModeToggle } from "@/components";
-import { getColumns, SelectionOptions } from "./columns";
+import { getColumns, type SelectionOptions } from "./columns";
 import { PaginationControls } from "./PaginationControls";
 
 export interface TrackTableProps {
