@@ -72,7 +72,7 @@ export function TrackFormFields({
               {...field}
               options={genres.list}
               loading={genres.loading}
-              error={genres.error}
+              error={!!genres.error}
             />
           )}
         />

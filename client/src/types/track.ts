@@ -16,3 +16,13 @@ export interface Meta {
   limit: number;
   totalPages: number;
 }
+
+export interface FetchTracksOptions {
+  page?: number;
+  limit?: number;
+  sort?: keyof Track;
+  order?: "asc" | "desc";
+  genre?: string;
+  artist?: string;
+  search?: string;
+}

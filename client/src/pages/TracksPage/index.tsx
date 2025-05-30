@@ -50,15 +50,17 @@ const TracksPage: React.FC = () => {
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
   const handleCreate = async (form: TrackFormData) => {
-    try {
-      await trackService.create(form);
-      showToastMessage("success", "Track created successfully");
-      await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (e) {
-      showToastMessage("error", extractErrorMessage(e));
-    } finally {
-      setIsCreating(false);
-    }
+    const res = await trackService.create(form);
+
+    res.match(
+      async () => {
+        showToastMessage("success", "Track created successfully");
+        await Promise.all([refetchTracks(), artists.refetch()]);
+      },
+      (e) => showToastMessage("error", extractErrorMessage(e))
+    );
+
+    setIsCreating(false);
   };
 
   const handleUpdate = async (form: TrackFormData) => {
@@ -76,70 +78,78 @@ const TracksPage: React.FC = () => {
       return;
     }
 
-    try {
-      await trackService.update(editingTrack.id, form);
-      showToastMessage("success", "Track updated successfully");
-      await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (err: unknown) {
-      showToastMessage("error", extractErrorMessage(err));
-    } finally {
-      setEditingTrack(null);
-    }
+    const res = await trackService.update(editingTrack.id, form);
+    res.match(
+      async () => {
+        showToastMessage("success", "Track updated successfully");
+        await Promise.all([refetchTracks(), artists.refetch()]);
+      },
+      (e) => showToastMessage("error", extractErrorMessage(e))
+    );
+    setEditingTrack(null);
   };
 
   const confirmDelete = async () => {
     if (!deletingTrack) return;
-    try {
-      await trackService.delete(deletingTrack.id);
-      showToastMessage("success", "Track deleted successfully");
-      await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (err: unknown) {
-      showToastMessage("error", extractErrorMessage(err));
-    } finally {
-      setDeletingTrack(null);
-    }
+
+    const res = await trackService.delete(deletingTrack.id);
+    res.match(
+      async () => {
+        showToastMessage("success", "Track deleted successfully");
+        await Promise.all([refetchTracks(), artists.refetch()]);
+      },
+      (e) => showToastMessage("error", extractErrorMessage(e))
+    );
+
+    setDeletingTrack(null);
   };
 
   const confirmUpload = async (file: File) => {
     if (!uploadingTrack) return;
-    try {
-      await trackService.uploadTrackFile(uploadingTrack.id, file);
-      showToastMessage("success", "File uploaded");
-      await refetchTracks();
-    } catch (err: unknown) {
-      showToastMessage("error", extractErrorMessage(err));
-    }
+
+    const res = await trackService.uploadTrackFile(uploadingTrack.id, file);
+    res.match(
+      async () => {
+        showToastMessage("success", "File uploaded");
+        await refetchTracks();
+      },
+      (e) => showToastMessage("error", extractErrorMessage(e))
+    );
+
     setUploadingTrack(null);
   };
 
   const confirmDeleteFile = async () => {
     if (!deletingFileTrack) return;
-    try {
-      await trackService.deleteTrackFile(deletingFileTrack.id);
-      showToastMessage("success", "File removed");
-      await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (err: unknown) {
-      showToastMessage("error", extractErrorMessage(err));
-    } finally {
-      setDeletingFile(null);
-    }
+
+    const res = await trackService.deleteTrackFile(deletingFileTrack.id);
+    res.match(
+      async () => {
+        showToastMessage("success", "File removed");
+        await Promise.all([refetchTracks(), artists.refetch()]);
+      },
+      (e) => showToastMessage("error", extractErrorMessage(e))
+    );
+
+    setDeletingFile(null);
   };
 
   const handleBulkDelete = async (ids: string[]) => {
-    try {
-      const { success, failed } = await trackService.deleteMultipleTracks(ids);
-      showToastMessage(
-        "success",
-        `Deleted ${success.length} track${success.length === 1 ? "" : "s"}`
-      );
-      if (failed.length)
-        showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
-      await Promise.all([refetchTracks(), artists.refetch()]);
-    } catch (err: unknown) {
-      showToastMessage("error", extractErrorMessage(err));
-    } finally {
-      setBulkDeleteIds([]);
-    }
+    const res = await trackService.deleteMultipleTracks(ids);
+    res.match(
+      async ({ success, failed }) => {
+        showToastMessage(
+          "success",
+          `Deleted ${success.length} track${success.length === 1 ? "" : "s"}`
+        );
+        if (failed.length)
+          showToastMessage("error", `Failed to delete: ${failed.join(", ")}`);
+        await Promise.all([refetchTracks(), artists.refetch()]);
+      },
+      (e) => showToastMessage("error", extractErrorMessage(e))
+    );
+
+    setBulkDeleteIds([]);
   };
 
   return (

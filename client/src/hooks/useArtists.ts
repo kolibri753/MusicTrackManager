@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { artistService } from "@/api";
-import type { RefreshableResourceState } from "@/types/resource";
+import type { RefreshableResourceState } from "@/types";
+import type { AppError } from "@/api/errors";
 
 /**
  * Get the list of artist names
@@ -8,30 +9,34 @@ import type { RefreshableResourceState } from "@/types/resource";
 export function useArtists(): RefreshableResourceState<string> {
   const [list, setList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<AppError | null>(null);
 
   const load = useCallback(async (signal?: AbortSignal) => {
-    try {
-      setLoading(true);
-      setError(false);
-      const data = await artistService.list({ signal });
-      setList(data);
-    } catch (err: unknown) {
-      if (!(err instanceof DOMException && err.name === "AbortError")) {
-        setError(true);
-      }
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+
+    const res = await artistService.list({ signal });
+    res.match(
+      (data) => {
+        setList(data);
+        setError(null);
+      },
+      (e) => setError(e)
+    );
+
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     const ctrl = new AbortController();
-    load(ctrl.signal);
-    return () => ctrl.abort();
+    void load(ctrl.signal);
+    return () => {
+      ctrl.abort();
+    };
   }, [load]);
 
-  const refetch = () => load();
+  const refetch = () => {
+    void load();
+  };
 
   return { list, loading, error, refetch };
 }
