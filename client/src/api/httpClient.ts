@@ -1,97 +1,80 @@
 import axios from "axios";
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-
-/**
- * Normalised transport error
- */
-export class HttpError extends Error {
-  public readonly status: number | undefined;
-
-  constructor(status: number | undefined, message: string = "Request failed") {
-    super(message);
-    this.status = status;
-    Object.setPrototypeOf(this, HttpError.prototype);
-  }
-}
+import type {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
+import { ok, err, Result } from "neverthrow";
+import type { AppError } from "./errors";
 
 /**
  * HTTP abstraction
  */
 export interface IHttpClient {
-  get<T>(url: string, cfg?: AxiosRequestConfig): Promise<T>;
-  post<T>(url: string, data?: unknown, cfg?: AxiosRequestConfig): Promise<T>;
-  put<T>(url: string, data?: unknown, cfg?: AxiosRequestConfig): Promise<T>;
-  delete<T>(url: string, cfg?: AxiosRequestConfig): Promise<T>;
+  get<T>(url: string, cfg?: AxiosRequestConfig): Promise<Result<T, AppError>>;
+  post<T>(
+    url: string,
+    data?: unknown,
+    cfg?: AxiosRequestConfig
+  ): Promise<Result<T, AppError>>;
+  put<T>(
+    url: string,
+    data?: unknown,
+    cfg?: AxiosRequestConfig
+  ): Promise<Result<T, AppError>>;
+  delete<T>(
+    url: string,
+    cfg?: AxiosRequestConfig
+  ): Promise<Result<T, AppError>>;
 }
 
-/**
- * Axios implementation
- */
 export class AxiosHttpClient implements IHttpClient {
-  private readonly axiosInstance: AxiosInstance;
+  private readonly ax: AxiosInstance;
 
   constructor(axiosInstance: AxiosInstance = axios) {
-    this.axiosInstance = axiosInstance;
+    this.ax = axiosInstance;
   }
 
-  private static toHttpError(err: unknown): never {
-    if (axios.isAxiosError(err)) {
-      const payload = err.response?.data as { error?: string } | undefined;
-      const message = payload?.error ?? err.message;
-      throw new HttpError(err.response?.status, message);
+  private toError(e: unknown): AppError {
+    if (axios.isAxiosError(e)) {
+      const ae = e as AxiosError<{ error?: string }>;
+      const msg = ae.response?.data?.error ?? ae.message;
+
+      switch (ae.response?.status) {
+        case 404:
+          return { type: "NotFound", resource: "Unknown", message: msg };
+        case 409:
+          return { type: "Conflict", resource: "Unknown", message: msg };
+        case 400:
+          return { type: "Validation", fieldErrors: {}, message: msg };
+        default:
+          return { type: "Network", status: ae.response?.status, message: msg };
+      }
     }
-    throw err;
+    return { type: "Unknown", cause: e, message: "Unexpected error" };
   }
 
-  async get<T>(url: string, cfg?: AxiosRequestConfig): Promise<T> {
+  private async wrap<T>(
+    p: Promise<AxiosResponse<T>>
+  ): Promise<Result<T, AppError>> {
     try {
-      const res: AxiosResponse<T> = await this.axiosInstance.get(url, cfg);
-      return res.data;
-    } catch (err: unknown) {
-      return AxiosHttpClient.toHttpError(err);
+      const res = await p;
+      return ok(res.data);
+    } catch (e) {
+      return err(this.toError(e));
     }
   }
 
-  async post<T>(
-    url: string,
-    data?: unknown,
-    cfg?: AxiosRequestConfig
-  ): Promise<T> {
-    try {
-      const res: AxiosResponse<T> = await this.axiosInstance.post(
-        url,
-        data,
-        cfg
-      );
-      return res.data;
-    } catch (err: unknown) {
-      return AxiosHttpClient.toHttpError(err);
-    }
-  }
+  get = <T>(u: string, c?: AxiosRequestConfig) =>
+    this.wrap<T>(this.ax.get(u, c));
 
-  async put<T>(
-    url: string,
-    data?: unknown,
-    cfg?: AxiosRequestConfig
-  ): Promise<T> {
-    try {
-      const res: AxiosResponse<T> = await this.axiosInstance.put(
-        url,
-        data,
-        cfg
-      );
-      return res.data;
-    } catch (err: unknown) {
-      return AxiosHttpClient.toHttpError(err);
-    }
-  }
+  post = <T>(u: string, d?: unknown, c?: AxiosRequestConfig) =>
+    this.wrap<T>(this.ax.post(u, d, c));
 
-  async delete<T>(url: string, cfg?: AxiosRequestConfig): Promise<T> {
-    try {
-      const res: AxiosResponse<T> = await this.axiosInstance.delete(url, cfg);
-      return res.data;
-    } catch (err: unknown) {
-      return AxiosHttpClient.toHttpError(err);
-    }
-  }
+  put = <T>(u: string, d?: unknown, c?: AxiosRequestConfig) =>
+    this.wrap<T>(this.ax.put(u, d, c));
+
+  delete = <T>(u: string, c?: AxiosRequestConfig) =>
+    this.wrap<T>(this.ax.delete(u, c));
 }
