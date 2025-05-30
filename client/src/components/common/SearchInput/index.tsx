@@ -1,4 +1,4 @@
-import React, { useState, useEffect, InputHTMLAttributes } from "react";
+import React, { useState, useEffect, type InputHTMLAttributes } from "react";
 import { Search } from "lucide-react";
 
 type NativeInputProps = Omit<

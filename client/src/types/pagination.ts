@@ -1,4 +1,4 @@
-import { Meta } from "@/types";
+import type { Meta } from "@/types";
 
 export type ListParams = Record<string, unknown>;
 

@@ -1,14 +1,17 @@
-import { ListParams } from "@/types";
-import { IHttpClient } from "./httpClient";
+import type { ListParams } from "@/types";
+import { type IHttpClient } from "./httpClient";
 
 /**
  * Generic CRUD wrapper
  */
 export abstract class BaseService<T, CreateDto = Partial<T>> {
-  protected constructor(
-    protected readonly http: IHttpClient,
-    protected readonly resource: string
-  ) {}
+  protected readonly http: IHttpClient;
+  protected readonly resource: string;
+
+  protected constructor(http: IHttpClient, resource: string) {
+    this.http = http;
+    this.resource = resource;
+  }
 
   /**
    * GET /resource

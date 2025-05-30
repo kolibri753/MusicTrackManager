@@ -19,9 +19,8 @@ export function useGenres(): ResourceState<string> {
         setList(data);
         setLoading(false);
       })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          console.error(err);
+      .catch((err: unknown) => {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
           setError(true);
           setLoading(false);
         }

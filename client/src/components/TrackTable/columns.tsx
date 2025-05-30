@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef } from "@tanstack/react-table";
 import BackupCoverUrl from "@/assets/logo.svg";
 import { Edit2, Trash2 } from "lucide-react";
 import type { Track } from "@/types/track";

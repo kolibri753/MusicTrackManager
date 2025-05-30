@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "./index";
-import type { Track } from "@/types/track";
+import type { Track } from "@/types";
 
 interface UploadFileModalProps {
   track: Track;
@@ -13,17 +13,10 @@ export function UploadFileModal({
   onUpload,
   onCancel,
 }: UploadFileModalProps) {
-  const [error, setError] = React.useState<string>("");
-
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError("");
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      await onUpload(file);
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message);
-    }
+    await onUpload(file);
   };
 
   return (
@@ -47,11 +40,6 @@ export function UploadFileModal({
               MP3, WAV… max size enforced by server (10MB)
             </span>
           </label>
-          {error && (
-            <p className="text-error text-sm mt-1" data-testid="error-file">
-              {error}
-            </p>
-          )}
         </fieldset>
 
         <div className="flex justify-end">

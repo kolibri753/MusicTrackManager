@@ -14,7 +14,7 @@ export function useTracks(initialLimit = 10) {
     totalPages: 1,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(initialLimit);
@@ -35,8 +35,10 @@ export function useTracks(initialLimit = 10) {
         );
         setData(res.data);
         setMeta(res.meta);
-      } catch (err: any) {
-        if (err.name !== "AbortError") setError(err);
+      } catch (err: unknown) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          setError(err);
+        }
       } finally {
         setLoading(false);
       }

@@ -16,9 +16,8 @@ export function useArtists(): RefreshableResourceState<string> {
       setError(false);
       const data = await artistService.list({ signal });
       setList(data);
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
-        console.error(err);
+    } catch (err: unknown) {
+      if (!(err instanceof DOMException && err.name === "AbortError")) {
         setError(true);
       }
     } finally {
@@ -31,7 +30,7 @@ export function useArtists(): RefreshableResourceState<string> {
     load(ctrl.signal);
     return () => ctrl.abort();
   }, [load]);
-  
+
   const refetch = () => load();
 
   return { list, loading, error, refetch };

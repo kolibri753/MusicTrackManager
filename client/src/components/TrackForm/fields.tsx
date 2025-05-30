@@ -1,9 +1,5 @@
-import {
-  Controller,
-  UseFormRegister,
-  Control,
-  FieldErrors,
-} from "react-hook-form";
+import { Controller } from "react-hook-form";
+import type { UseFormRegister, Control, FieldErrors } from "react-hook-form";
 import { TagSelector } from "@/components";
 import type { TrackFormData } from "@/schemas";
 import type { ResourceState } from "@/types";
@@ -25,7 +21,6 @@ export function TrackFormFields({
 }: Props) {
   return (
     <>
-      {/* ​Title */}
       <div>
         <label className="label">
           <span className="label-text">Title</span>
@@ -40,7 +35,6 @@ export function TrackFormFields({
         )}
       </div>
 
-      {/* ​Artist */}
       <div>
         <label className="label">
           <span className="label-text">Artist</span>
@@ -55,7 +49,6 @@ export function TrackFormFields({
         )}
       </div>
 
-      {/* Album (optional) */}
       <div>
         <label className="label">
           <span className="label-text">Album</span>
@@ -67,7 +60,6 @@ export function TrackFormFields({
         />
       </div>
 
-      {/* Genres */}
       <div>
         <label className="label">
           <span className="label-text">Genres</span>
@@ -89,7 +81,6 @@ export function TrackFormFields({
         )}
       </div>
 
-      {/* Cover URL */}
       <div>
         <label className="label">
           <span className="label-text">Cover Image URL</span>
