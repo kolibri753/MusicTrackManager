@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { genreService } from "@/api";
 import type { ResourceState } from "@/types";
+import type { AppError } from "@/api/errors";
 
 /**
  * Get the list of genre names
@@ -8,22 +9,27 @@ import type { ResourceState } from "@/types";
 export function useGenres(): ResourceState<string> {
   const [list, setList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<AppError | null>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
+    setLoading(true);
 
     genreService
       .list({ signal: ctrl.signal })
-      .then((data) => {
-        setList(data);
+      .then((res) =>
+        res.match(
+          (data) => {
+            setList(data);
+            setError(null);
+          },
+          (e) => {
+            setError(e);
+          }
+        )
+      )
+      .finally(() => {
         setLoading(false);
-      })
-      .catch((err: unknown) => {
-        if (!(err instanceof DOMException && err.name === "AbortError")) {
-          setError(true);
-          setLoading(false);
-        }
       });
 
     return () => ctrl.abort();

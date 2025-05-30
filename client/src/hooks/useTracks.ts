@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { trackService } from "@/api";
 import type { Track, Meta } from "@/types";
+import type { AppError } from "@/api/errors";
 
 /**
  * Fetch and control paged track data
@@ -14,7 +15,7 @@ export function useTracks(initialLimit = 10) {
     totalPages: 1,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<AppError | null>(null);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(initialLimit);
@@ -27,21 +28,21 @@ export function useTracks(initialLimit = 10) {
   const fetchData = useCallback(
     async (signal?: AbortSignal) => {
       setLoading(true);
-      setError(null);
-      try {
-        const res = await trackService.fetchTracks(
-          { page, limit, sort, order, genre, artist, search },
-          signal
-        );
-        setData(res.data);
-        setMeta(res.meta);
-      } catch (err: unknown) {
-        if (!(err instanceof DOMException && err.name === "AbortError")) {
-          setError(err);
-        }
-      } finally {
-        setLoading(false);
-      }
+      const res = await trackService.fetchTracks(
+        { page, limit, sort, order, genre, artist, search },
+        signal
+      );
+
+      res.match(
+        ({ data: list, meta: m }) => {
+          setData(list);
+          setMeta(m);
+          setError(null);
+        },
+        (e) => setError(e)
+      );
+
+      setLoading(false);
     },
     [page, limit, sort, order, genre, artist, search]
   );

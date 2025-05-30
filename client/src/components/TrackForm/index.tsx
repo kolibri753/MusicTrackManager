@@ -11,16 +11,18 @@ interface Props {
 }
 
 export function TrackForm({ initialData, genres, onSubmit, onCancel }: Props) {
-  const { register, control, errors, isSubmitting, submit } = useTrackForm({
-    initial: initialData,
-    onSubmit,
-  });
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useTrackForm({ initial: initialData });
 
   return (
     <form
       data-testid="track-form"
       data-loading={isSubmitting || undefined}
-      onSubmit={submit}
+      onSubmit={handleSubmit(onSubmit)}
       className="space-y-4"
     >
       <TrackFormFields

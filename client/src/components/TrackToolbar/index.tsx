@@ -40,7 +40,7 @@ export const TrackToolbar: React.FC<TrackToolbarProps> = ({
         options={artists.list}
         value={filterArtist}
         loading={artists.loading}
-        error={artists.error}
+        error={!!artists.error}
         dataTestId="filter-artist"
         onChange={setFilterArtist}
       />
@@ -49,7 +49,7 @@ export const TrackToolbar: React.FC<TrackToolbarProps> = ({
         options={genres.list}
         value={filterGenre}
         loading={genres.loading}
-        error={genres.error}
+        error={!!genres.error}
         dataTestId="filter-genre"
         onChange={setFilterGenre}
       />

@@ -1,25 +1,33 @@
-import { HttpError } from "@/api/httpClient";
+import type { AppError } from "@/api/errors";
 
 /**
  * Pulls a human-readable message
  */
 export function extractErrorMessage(err: unknown): string {
-  if (err instanceof HttpError) {
-    // our normalized HTTP errors
-    return err.message || "Request failed";
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "type" in err &&
+    "message" in err
+  ) {
+    const e = err as AppError;
+    if (e.type === "Validation") {
+      const parts = Object.values(e.fieldErrors);
+      if (parts.length > 0) return parts.join(", ");
+    }
+    return e.message;
   }
 
   if (err instanceof Error) {
-    // native JS errors
     return err.message || "Unexpected error";
   }
 
-  // anything with a "message" property
-  if (typeof err === "object" && err !== null) {
-    const maybeMsg = (err as { message?: unknown }).message;
-    if (typeof maybeMsg === "string") {
-      return maybeMsg;
-    }
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    typeof (err as { message?: unknown }).message === "string"
+  ) {
+    return (err as { message: string }).message;
   }
 
   return "Something went wrong";
