@@ -13,7 +13,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-table": "^8.21.3",
-    "axios": "^1.8.4",
+    "axios": "^1.12.0",
     "clsx": "^2.1.1",
     "eslint-plugin-neverthrow": "^1.1.4",
     "lucide-react": "^0.493.0",
